@@ -1,22 +1,36 @@
-# DriveFleet
+# RideMint
 
-DriveFleet is a placement-ready car-rental and fleet-management web application
-being developed incrementally with React, Vite, Firebase, and Tailwind CSS.
+RideMint is a placement-ready, company-owned car-rental and fleet-management
+application being developed incrementally with React, Vite, Firebase, and
+Tailwind CSS.
 
-The repository currently contains an early customer and administrator interface
-connected directly to Firebase client services. Phase 0 identified useful
-foundations as well as security, data consistency, accessibility, and visual
-design work that must be addressed before the application can be considered
-reliable.
+Customers rent RideMint vehicles directly. The current product does not support
+third-party hosts, owner listings, payouts, or peer-to-peer messaging.
+
+## Previous status
+
+Phase 1B — branding and product-scope alignment — is complete. The Graphite Mint
+design system can be inspected at `/design-system` while the development server
+is running. Existing product pages have not yet been redesigned.
 
 ## Current status
 
-Phase 0 — repository audit and plan — is complete. No application code or
-Firebase configuration was changed during the audit.
+Phase 2 — core customer browsing — is complete. The light-first Graphite Mint
+customer shell now includes a focused Home page, a filterable demo catalogue,
+vehicle details, and About. The design system remains available at
+`/design-system`.
+
+Phase 2 deliberately uses a deterministic local demo catalogue. Existing
+Firebase configuration, collections, authentication, booking, and administrator
+behavior remain unchanged.
 
 See:
 
 - [Architecture](docs/architecture.md)
+- [Product scope](docs/product-scope.md)
+- [Design system](docs/design-system.md)
+- [Route audit](docs/route-audit.md)
+- [Image credits and strategy](docs/image-credits.md)
 - [Firebase setup](docs/firebase-setup.md)
 - [Data model](docs/data-model.md)
 - [Progress](docs/progress.md)
@@ -31,23 +45,15 @@ npm run lint
 npm run build
 ```
 
-The current lint command completes with warnings, and the production build
-completes with a large-chunk warning. These are recorded in
+Lint currently completes with pre-existing feature warnings. The production
+build succeeds with a large-chunk warning. Details are recorded in
 `docs/progress.md`.
 
 ## Environment
 
-The application expects the following Vite variables:
+Firebase still uses the existing `VITE_FIREBASE_*` environment variables.
+Visible RideMint branding does not require renaming Firebase projects, deployed
+resources, collections, fields, or environment keys.
 
-```text
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID
-```
-
-Do not commit a populated `.env` or `.env.local`. An example file will be added
-as part of the approved foundation/Firebase setup work without inventing values.
-
+Never commit a populated `.env`, `.env.local`, service-account file, private
+key, or deployment token.

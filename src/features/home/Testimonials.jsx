@@ -23,7 +23,7 @@ const testimonials = [
     id: 3,
     name: "Elena Rodriguez",
     role: "Local Resident",
-    quote: "I use DriveFleet whenever I need a luxury vehicle for special occasions. Their fleet is unmatched in the city, and the prices are surprisingly reasonable.",
+    quote: "I use RideMint whenever I need a vehicle for special occasions. The booking process is clear and easy to follow.",
     rating: 5,
     avatar: "E"
   }

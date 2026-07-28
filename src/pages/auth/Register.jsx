@@ -71,7 +71,7 @@ export default function Register() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl lg:text-5xl font-heading font-bold mb-4 tracking-tight leading-tight"
           >
-            Join DriveFleet Today
+            Create your RideMint account
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}

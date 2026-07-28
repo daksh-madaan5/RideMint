@@ -1,210 +1,162 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { motion, AnimatePresence } from 'motion/react';
-import { useQuery } from '@tanstack/react-query';
-import { HiOutlineAdjustmentsHorizontal, HiOutlineViewColumns, HiOutlineBars4 } from 'react-icons/hi2';
-import { getCars } from '@/firebase/cars';
+import { HiAdjustmentsHorizontal, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
+import Button from '@/components/ui/Button';
+import Drawer from '@/components/ui/Drawer';
+import EmptyState from '@/components/ui/EmptyState';
+import ErrorState from '@/components/ui/ErrorState';
+import PageHeader from '@/components/ui/PageHeader';
+import Select from '@/components/ui/Select';
+import Skeleton from '@/components/ui/Skeleton';
 import CarCard from '@/features/cars/CarCard';
 import CarFilters from '@/features/cars/CarFilters';
-import Button from '@/components/ui/Button';
+import { useCatalogVehicles } from '@/features/cars/hooks/useCatalogVehicles';
+import { formatDate } from '@/utils/helpers';
+
+const FILTER_KEYS = ['location', 'category', 'transmission', 'fuelType', 'seats', 'priceRange'];
+const EMPTY_FILTERS = Object.fromEntries(FILTER_KEYS.map((key) => [key, '']));
+const SORT_OPTIONS = [
+  { value: 'recommended', label: 'Recommended' },
+  { value: 'price-asc', label: 'Price: low to high' },
+  { value: 'price-desc', label: 'Price: high to low' },
+  { value: 'name', label: 'Name: A to Z' },
+];
+
+function matchesPrice(price, range) {
+  if (!range) return true;
+  const [minimum, maximum] = range.split('-').map(Number);
+  return price >= minimum && price <= maximum;
+}
 
 export default function Cars() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [view, setView] = useState('grid');
-  
-  // Initialize filters from URL
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    brands: searchParams.getAll('brand') || [],
-    fuelType: searchParams.get('fuelType') || null,
-    transmission: searchParams.get('transmission') || null,
-    availableOnly: searchParams.get('available') === 'true',
-    sortBy: searchParams.get('sort') || 'recommended'
-  });
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const { data: vehicles = [], isLoading, isError, refetch } = useCatalogVehicles();
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.search) params.set('search', filters.search);
-    if (filters.fuelType) params.set('fuelType', filters.fuelType);
-    if (filters.transmission) params.set('transmission', filters.transmission);
-    if (filters.availableOnly) params.set('available', 'true');
-    if (filters.sortBy !== 'recommended') params.set('sort', filters.sortBy);
-    filters.brands.forEach(brand => params.append('brand', brand));
-    setSearchParams(params);
-  }, [filters, setSearchParams]);
+  const filters = Object.fromEntries(FILTER_KEYS.map((key) => [key, searchParams.get(key) || '']));
+  const sortBy = searchParams.get('sort') || 'recommended';
+  const pickup = searchParams.get('pickup');
+  const returnDate = searchParams.get('return');
 
-  const { data: cars, isLoading } = useQuery({
-    queryKey: ['cars', filters],
-    queryFn: () => getCars(filters)
-  });
-
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
+  const updateParam = (key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setSearchParams(next, { replace: true });
   };
 
   const clearFilters = () => {
-    setFilters({
-      search: '',
-      brands: [],
-      fuelType: null,
-      transmission: null,
-      availableOnly: false,
-      sortBy: 'recommended'
-    });
+    const next = new URLSearchParams(searchParams);
+    FILTER_KEYS.forEach((key) => next.delete(key));
+    setSearchParams(next, { replace: true });
   };
 
+  const filteredVehicles = useMemo(() => {
+    const matches = vehicles.filter((vehicle) => (
+      (!filters.location || vehicle.city === filters.location)
+      && (!filters.category || vehicle.category === filters.category)
+      && (!filters.transmission || vehicle.transmission === filters.transmission)
+      && (!filters.fuelType || vehicle.fuelType === filters.fuelType)
+      && (!filters.seats || vehicle.seats === Number(filters.seats))
+      && matchesPrice(vehicle.pricePerDay, filters.priceRange)
+    ));
+
+    if (sortBy === 'price-asc') return [...matches].sort((a, b) => a.pricePerDay - b.pricePerDay);
+    if (sortBy === 'price-desc') return [...matches].sort((a, b) => b.pricePerDay - a.pricePerDay);
+    if (sortBy === 'name') return [...matches].sort((a, b) => `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`));
+    return matches;
+  }, [filters.category, filters.fuelType, filters.location, filters.priceRange, filters.seats, filters.transmission, sortBy, vehicles]);
+
+  const dateContext = pickup && returnDate
+    ? `${formatDate(pickup)} to ${formatDate(returnDate)}`
+    : null;
+
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="mb-8 md:mb-10">
-          <motion.h1 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-surface-900 dark:text-surface-50 tracking-tight mb-3"
-          >
-            Explore Our Fleet
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-base sm:text-lg text-surface-600 dark:text-surface-400 max-w-2xl leading-relaxed"
-          >
-            Find the perfect vehicle for your next journey. From high-performance coupes to luxury SUVs, choose your drive.
-          </motion.p>
+    <div className="mx-auto max-w-[var(--content-customer)] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <PageHeader
+        eyebrow="RideMint fleet"
+        title="Explore cars"
+        description="Compare company-owned vehicles using the details that matter for your trip."
+      />
+
+      {dateContext && (
+        <div className="mt-6 rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--primary-subtle)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+          Showing catalogue options for <strong className="font-semibold text-[var(--text-primary)]">{dateContext}</strong>. Final date availability is confirmed during booking.
         </div>
+      )}
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Desktop Sidebar */}
-          <div className="hidden lg:block w-72 shrink-0">
-            <div className="sticky top-24">
-              <CarFilters 
-                filters={filters} 
-                onFilterChange={handleFilterChange} 
-                onClear={clearFilters} 
-              />
-            </div>
+      <div className="mt-8 grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24">
+            <CarFilters filters={filters} onChange={updateParam} onClear={clearFilters} />
           </div>
+        </aside>
 
-          {/* Main Content */}
-          <div className="flex-1 w-full">
-            {/* Top Bar */}
-            <div className="bg-white dark:bg-surface-900 rounded-2xl p-4 border border-surface-200 dark:border-surface-800 flex flex-wrap items-center justify-between gap-4 mb-8 shadow-sm">
-              <div className="flex items-center gap-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="lg:hidden flex items-center gap-2"
-                  onClick={() => setIsMobileFiltersOpen(true)}
-                >
-                  <HiOutlineAdjustmentsHorizontal className="h-4 w-4" />
-                  Filters
-                </Button>
-                <span className="text-sm text-surface-600 dark:text-surface-400 font-medium">
-                  {isLoading ? 'Loading catalog...' : `${cars?.length || 0} vehicles available`}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <select 
-                  className="bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-surface-900 dark:text-surface-100 text-xs sm:text-sm rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 block px-3 py-2"
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange({ ...filters, sortBy: e.target.value })}
-                >
-                  <option value="recommended">Recommended</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
-                </select>
-
-                <div className="hidden sm:flex items-center bg-surface-100 dark:bg-surface-800 p-1 rounded-xl">
-                  <button 
-                    onClick={() => setView('grid')}
-                    aria-label="Grid view"
-                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'grid' ? 'bg-white dark:bg-surface-900 shadow-sm text-surface-900 dark:text-surface-100' : 'text-surface-500 hover:text-surface-900 dark:hover:text-surface-100'}`}
-                  >
-                    <HiOutlineViewColumns className="h-4 w-4" />
-                  </button>
-                  <button 
-                    onClick={() => setView('list')}
-                    aria-label="List view"
-                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'list' ? 'bg-white dark:bg-surface-900 shadow-sm text-surface-900 dark:text-surface-100' : 'text-surface-500 hover:text-surface-900 dark:hover:text-surface-100'}`}
-                  >
-                    <HiOutlineBars4 className="h-4 w-4" />
-                  </button>
-                </div>
+        <section aria-labelledby="catalog-results">
+          <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" className="lg:hidden" icon={HiAdjustmentsHorizontal} onClick={() => setMobileFiltersOpen(true)}>
+                Filters
+              </Button>
+              <div>
+                <h2 id="catalog-results" className="text-sm font-semibold text-[var(--text-primary)]">
+                  {isLoading ? 'Loading vehicles…' : `${filteredVehicles.length} ${filteredVehicles.length === 1 ? 'vehicle' : 'vehicles'}`}
+                </h2>
+                <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">Demo catalogue availability</p>
               </div>
             </div>
-
-            {/* Grid */}
-            {isLoading ? (
-              <div className={`grid gap-6 ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-white dark:bg-surface-900 rounded-2xl h-[380px] border border-surface-200 dark:border-surface-800" />
-                ))}
-              </div>
-            ) : cars?.length === 0 ? (
-              <div className="text-center py-16 px-4 bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-800 max-w-md mx-auto">
-                <div className="text-5xl mb-3">🚗</div>
-                <h3 className="text-lg font-heading font-bold text-surface-900 dark:text-surface-50 mb-1">No vehicles matched</h3>
-                <p className="text-sm text-surface-500 dark:text-surface-400 mb-6">Try adjusting your filters or search keywords.</p>
-                <Button onClick={clearFilters} variant="outline" size="sm">Reset All Filters</Button>
-              </div>
-            ) : (
-              <div className={`grid gap-6 ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-                {cars?.map((car, index) => (
-                  <motion.div
-                    key={car.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.04 }}
-                  >
-                    <CarCard car={car} />
-                  </motion.div>
-                ))}
-              </div>
-            )}
+            <Select
+              label="Sort by"
+              value={sortBy}
+              onChange={(event) => updateParam('sort', event.target.value === 'recommended' ? '' : event.target.value)}
+              options={SORT_OPTIONS}
+              containerClassName="sm:w-52"
+            />
           </div>
-        </div>
+
+          {isLoading && (
+            <div className="mt-6 grid gap-6 md:grid-cols-2" aria-label="Loading vehicles">
+              {[0, 1, 2, 3].map((item) => (
+                <Skeleton key={item} variant="card" className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5" />
+              ))}
+            </div>
+          )}
+          {isError && (
+            <ErrorState
+              className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
+              title="The fleet did not load"
+              description="Please retry the demo catalogue request."
+              onRetry={refetch}
+            />
+          )}
+          {!isLoading && !isError && filteredVehicles.length === 0 && (
+            <EmptyState
+              className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
+              icon={HiOutlineMagnifyingGlass}
+              title="No cars match these filters"
+              description="Clear the filters and try a broader search."
+              action={{ label: 'Clear filters', onClick: clearFilters }}
+            />
+          )}
+          {!isLoading && !isError && filteredVehicles.length > 0 && (
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              {filteredVehicles.map((vehicle) => <CarCard key={vehicle.id} car={vehicle} />)}
+            </div>
+          )}
+        </section>
       </div>
 
-      {/* Mobile Filter Drawer */}
-      <AnimatePresence>
-        {isMobileFiltersOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileFiltersOpen(false)}
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs"
-            />
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="fixed inset-y-0 left-0 w-full max-w-xs bg-white dark:bg-surface-900 z-50 overflow-y-auto p-5 shadow-2xl"
-            >
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-surface-200 dark:border-surface-800">
-                <h2 className="text-lg font-heading font-bold text-surface-900 dark:text-surface-50">Filter Catalog</h2>
-                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-1 text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 rounded-lg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-              </div>
-              <CarFilters 
-                filters={filters} 
-                onFilterChange={handleFilterChange} 
-                onClear={clearFilters} 
-                className="border-none shadow-none px-0"
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <Drawer isOpen={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filter cars" side="left">
+        <CarFilters
+          filters={{ ...EMPTY_FILTERS, ...filters }}
+          onChange={updateParam}
+          onClear={clearFilters}
+          className="border-0 p-0 shadow-none"
+        />
+        <Button fullWidth className="mt-5" onClick={() => setMobileFiltersOpen(false)}>
+          Show {filteredVehicles.length} {filteredVehicles.length === 1 ? 'car' : 'cars'}
+        </Button>
+      </Drawer>
     </div>
   );
 }

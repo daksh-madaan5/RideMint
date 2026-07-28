@@ -15,8 +15,8 @@ import puppeteer from 'puppeteer';
     await page.goto('http://localhost:5173', { waitUntil: 'domcontentloaded' });
     console.log('Homepage loaded successfully.');
     const bodyText = await page.evaluate(() => document.body.innerText);
-    if (!bodyText.includes('DriveFleet')) {
-      console.log('Warning: DriveFleet not found on homepage.');
+    if (!bodyText.includes('RideMint')) {
+      console.log('Warning: RideMint not found on homepage.');
     }
 
     console.log('2. Testing Register');

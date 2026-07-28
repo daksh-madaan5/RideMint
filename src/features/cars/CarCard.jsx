@@ -1,121 +1,66 @@
 import { Link } from 'react-router';
-import { motion } from 'motion/react';
-import { 
-  HiOutlineHeart, 
-  HiHeart, 
-  HiStar, 
-  HiOutlineUserGroup, 
-  HiOutlineAdjustmentsHorizontal, 
-  HiOutlineMapPin,
-  HiOutlineCheckCircle
-} from 'react-icons/hi2';
+import { HiArrowRight, HiMapPin } from 'react-icons/hi2';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import { formatPrice, getCarImage, getCarFuel } from '@/utils/helpers';
-import { useAuth } from '@/hooks/useAuth';
+import { formatPrice } from '@/utils/helpers';
+import VehicleImage from './VehicleImage';
 
-export default function CarCard({ car, onFavoriteToggle, isFavorite = false }) {
-  const { user } = useAuth();
-  const carImage = getCarImage(car);
-  const fuelType = getCarFuel(car);
+export default function CarCard({ car }) {
+  const vehicleName = `${car.brand} ${car.model}`;
 
   return (
-    <motion.div 
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="group bg-white dark:bg-surface-900 rounded-3xl border border-surface-200 dark:border-surface-800 shadow-card hover:shadow-card-hover overflow-hidden transition-all duration-300 flex flex-col h-full"
-    >
-      {/* Car Image & Badges Banner */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-surface-100 dark:bg-surface-800">
-        <img 
-          src={carImage} 
-          alt={`${car.brand} ${car.model}`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-        
-        {/* Zoomcar-Style Rating Overlay (Top Left) */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-surface-950/85 backdrop-blur-md text-xs font-semibold rounded-full shadow-sm text-white border border-white/10">
-          <HiStar className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-          <span>{car.rating || '4.8'}</span>
-          <span className="text-surface-400 text-[10px]">({car.reviewCount || 34}+ trips)</span>
-        </div>
+    <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-subtle)] transition-[transform,border-color,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)] hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]">
+      <VehicleImage
+        src={car.image || car.images?.[0]}
+        alt={`${vehicleName} rental vehicle`}
+        imageClassName="transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.03]"
+      />
 
-        {/* Favorite Button (Top Right) */}
-        {user && onFavoriteToggle && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              onFavoriteToggle(car.id);
-            }}
-            aria-label="Toggle Favorite"
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-surface-900/90 backdrop-blur-md shadow-xs hover:bg-white dark:hover:bg-surface-800 transition-colors cursor-pointer"
-          >
-            {isFavorite ? (
-              <HiHeart className="h-5 w-5 text-red-500 fill-red-500" />
-            ) : (
-              <HiOutlineHeart className="h-5 w-5 text-surface-600 dark:text-surface-300" />
-            )}
-          </button>
-        )}
-
-        {/* Fuel Badge (Bottom Left) */}
-        <div className="absolute bottom-3 left-3">
-          <span className="px-2.5 py-0.5 bg-white/90 dark:bg-surface-900/90 backdrop-blur-md text-[11px] font-semibold rounded-md shadow-xs text-surface-800 dark:text-surface-200 border border-surface-200/50 dark:border-surface-700/50">
-            {fuelType}
-          </span>
-        </div>
-      </div>
-
-      {/* Card Body */}
-      <div className="p-5 sm:p-6 flex flex-col flex-1">
-        {/* Location Subtitle */}
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1">
-          <HiOutlineMapPin className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{car.location || 'San Francisco, CA'} · Free Delivery</span>
-        </div>
-
-        {/* Vehicle Title */}
-        <h3 className="text-lg sm:text-xl font-heading font-bold text-surface-900 dark:text-surface-50 line-clamp-1 tracking-tight mb-2">
-          {car.brand} {car.model} <span className="text-sm font-medium text-surface-400">({car.year})</span>
-        </h3>
-
-        {/* Spec Chips (Zoomcar Style) */}
-        <div className="flex flex-wrap gap-2 my-3">
-          <div className="flex items-center gap-1 text-[11px] font-semibold text-surface-600 dark:text-surface-300 bg-surface-100 dark:bg-surface-800 px-2.5 py-1 rounded-md">
-            <HiOutlineAdjustmentsHorizontal className="h-3.5 w-3.5 text-surface-400" />
-            <span>{car.transmission || 'Automatic'}</span>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] font-semibold text-surface-600 dark:text-surface-300 bg-surface-100 dark:bg-surface-800 px-2.5 py-1 rounded-md">
-            <HiOutlineUserGroup className="h-3.5 w-3.5 text-surface-400" />
-            <span>{car.seats || 5} Seats</span>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-md">
-            <HiOutlineCheckCircle className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Zero Deposit</span>
-          </div>
-        </div>
-
-        {/* Price & Booking Footer */}
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-surface-100 dark:border-surface-800">
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-xl sm:text-2xl font-heading font-bold text-surface-900 dark:text-surface-50">
-                {formatPrice(car.pricePerDay || 0)}
-              </span>
-              <span className="text-xs font-medium text-surface-500 dark:text-surface-400">/day</span>
-            </div>
-            <p className="text-[10px] font-medium text-surface-400">Taxes included</p>
+            <p className="type-caption">{car.category}</p>
+            <h2 className="type-card-heading mt-1">{vehicleName}</h2>
           </div>
-          <Button 
-            as={Link} 
-            to={`/cars/${car.id}`} 
-            size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xs"
-          >
-            Book Now
+          <Badge variant={car.available ? 'success' : 'default'} dot={car.available}>
+            {car.available ? 'Available' : 'Unavailable'}
+          </Badge>
+        </div>
+
+        <p className="mt-3 flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+          <HiMapPin className="h-4 w-4 text-[var(--primary)]" aria-hidden="true" />
+          {car.city || car.location}
+        </p>
+
+        <dl className="mt-4 grid grid-cols-3 gap-2 border-y border-[var(--border)] py-3 text-sm">
+          <div>
+            <dt className="type-caption">Gearbox</dt>
+            <dd className="mt-1 font-medium text-[var(--text-primary)]">{car.transmission}</dd>
+          </div>
+          <div>
+            <dt className="type-caption">Fuel</dt>
+            <dd className="mt-1 font-medium text-[var(--text-primary)]">{car.fuelType}</dd>
+          </div>
+          <div>
+            <dt className="type-caption">Seats</dt>
+            <dd className="mt-1 font-medium text-[var(--text-primary)]">{car.seats}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-auto flex items-end justify-between gap-4 pt-5">
+          <div>
+            <p className="type-caption">From</p>
+            <p className="type-numeric mt-0.5 text-xl font-semibold text-[var(--text-primary)]">
+              {formatPrice(car.pricePerDay)}
+              <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/day</span>
+            </p>
+          </div>
+          <Button as={Link} to={`/cars/${car.id}`} variant="outline" size="sm" iconRight={HiArrowRight}>
+            View details
           </Button>
         </div>
       </div>
-    </motion.div>
+    </article>
   );
 }
+

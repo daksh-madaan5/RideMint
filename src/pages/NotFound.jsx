@@ -1,36 +1,19 @@
 import { Link } from 'react-router';
-import { motion } from 'motion/react';
-import Button from '@/components/ui/Button';
 import { HiOutlineArrowRight } from 'react-icons/hi2';
+import Button from '@/components/ui/Button';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full text-center"
-      >
-        <h1 className="text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">
-          404
-        </h1>
-        <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
-          Page Not Found
-        </h2>
-        <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button as={Link} to="/" variant="outline" className="w-full sm:w-auto">
-            Go Home
-          </Button>
-          <Button as={Link} to="/cars" className="w-full sm:w-auto group">
-            Browse Cars
-            <HiOutlineArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-      </motion.div>
-    </div>
+    <section className="mx-auto flex min-h-[65vh] max-w-xl flex-col items-center justify-center px-4 py-20 text-center">
+      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Error 404</p>
+      <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">That road ends here.</h1>
+      <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
+        The page may have moved, or the address may be incomplete. You can return home or continue browsing cars.
+      </p>
+      <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+        <Button as={Link} to="/" variant="secondary">Go home</Button>
+        <Button as={Link} to="/cars" iconRight={HiOutlineArrowRight}>Explore cars</Button>
+      </div>
+    </section>
   );
 }

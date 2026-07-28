@@ -1,20 +1,32 @@
-import { useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import { clsx } from 'clsx';
 import { HiXMark } from 'react-icons/hi2';
+import IconButton from './IconButton';
 
-/**
- * Animated Modal component with backdrop blur and close on ESC/click-outside.
- */
+const focusableSelector = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
 export default function Modal({
   isOpen,
   onClose,
   title,
+  description,
   children,
   size = 'md',
   showClose = true,
   className,
 }) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
   const sizes = {
     sm: 'max-w-md',
     md: 'max-w-lg',
@@ -23,78 +35,94 @@ export default function Modal({
     full: 'max-w-6xl',
   };
 
-  // Close on ESC key
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === 'Escape') onClose();
-    },
-    [onClose]
-  );
+  const handleKeyDown = useCallback((event) => {
+    if (event.key === 'Escape' && onClose) {
+      onClose();
+      return;
+    }
+
+    if (event.key !== 'Tab' || !dialogRef.current) return;
+
+    const focusable = [...dialogRef.current.querySelectorAll(focusableSelector)];
+    if (!focusable.length) {
+      event.preventDefault();
+      dialogRef.current.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }, [onClose]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
+    if (!isOpen) return undefined;
+
+    previousFocusRef.current = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+
+    const frame = requestAnimationFrame(() => {
+      const firstFocusable = dialogRef.current?.querySelector(focusableSelector);
+      (firstFocusable || dialogRef.current)?.focus();
+    });
+
     return () => {
+      cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      previousFocusRef.current?.focus?.();
     };
-  }, [isOpen, handleKeyDown]);
+  }, [handleKeyDown, isOpen]);
+
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-          />
-
-          {/* Modal Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={clsx(
-              'relative w-full glass-strong rounded-2xl shadow-2xl',
-              'max-h-[85vh] flex flex-col',
-              sizes[size],
-              className
-            )}
-          >
-            {/* Header */}
-            {(title || showClose) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700/50">
-                {title && (
-                  <h2 className="text-lg font-semibold font-heading text-surface-100">
-                    {title}
-                  </h2>
-                )}
-                {showClose && (
-                  <button
-                    onClick={onClose}
-                    className="p-1.5 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-700/50 transition-colors"
-                  >
-                    <HiXMark className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 scrollbar-custom">
-              {children}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default bg-[color-mix(in_srgb,var(--navigation)_55%,transparent)] transition-opacity duration-[var(--duration-normal)]"
+        aria-label="Close dialog"
+        onClick={onClose}
+      />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={description ? descriptionId : undefined}
+        tabIndex={-1}
+        className={clsx(
+          'relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[var(--radius-modal)] border border-[var(--border)] bg-[var(--surface-elevated)] shadow-[var(--shadow-dialog)]',
+          'animate-[dialog-enter_var(--duration-normal)_var(--ease-enter)]',
+          sizes[size] || sizes.md,
+          className
+        )}
+      >
+        {(title || showClose) && (
+          <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-5 py-4 sm:px-6">
+            <div>
+              {title && <h2 id={titleId} className="type-card-heading">{title}</h2>}
+              {description && <p id={descriptionId} className="type-supporting mt-1">{description}</p>}
             </div>
-          </motion.div>
+            {showClose && onClose && (
+              <IconButton label="Close dialog" size="sm" onClick={onClose}>
+                <HiXMark className="h-5 w-5" aria-hidden="true" />
+              </IconButton>
+            )}
+          </div>
+        )}
+        <div className="scrollbar-custom flex-1 overflow-y-auto p-5 sm:p-6">
+          {children}
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }

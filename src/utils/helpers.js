@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 
-export const DEFAULT_CAR_IMAGE = 'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?q=80&w=2115&auto=format&fit=crop';
+export const DEFAULT_CAR_IMAGE = '/images/cars/vehicle-placeholder.svg';
 
 export const getCarImages = (car) => {
   if (!car) return [DEFAULT_CAR_IMAGE];
@@ -23,16 +23,23 @@ export const getCarFuel = (car) => {
 };
 
 export const formatPrice = (amount) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 };
 
 export const formatDate = (date) => {
   if (!date) return '';
   const parsedDate = typeof date.toDate === 'function' ? date.toDate() : new Date(date);
-  return format(parsedDate, 'PPP');
+  if (Number.isNaN(parsedDate.getTime())) return '';
+  return new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsedDate);
 };
 
 export const calculateRentalDays = (pickupDate, returnDate) => {

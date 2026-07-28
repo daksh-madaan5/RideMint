@@ -1,53 +1,46 @@
-import React from 'react';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 
-export const Badge = ({
+const variants = {
+  default: 'bg-[var(--surface-subtle)] text-[var(--text-secondary)]',
+  primary: 'bg-[var(--primary-subtle)] text-[var(--primary)]',
+  info: 'bg-[var(--info-subtle)] text-[var(--primary)]',
+  success: 'bg-[var(--success-subtle)] text-[var(--success)]',
+  warning: 'bg-[var(--warning-subtle)] text-[var(--warning)]',
+  danger: 'bg-[var(--danger-subtle)] text-[var(--danger)]',
+  purple: 'bg-[var(--primary-subtle)] text-[var(--primary)]',
+};
+
+const dotColors = {
+  default: 'bg-[var(--text-tertiary)]',
+  primary: 'bg-[var(--primary)]',
+  info: 'bg-[var(--primary)]',
+  success: 'bg-[var(--success)]',
+  warning: 'bg-[var(--warning)]',
+  danger: 'bg-[var(--danger)]',
+  purple: 'bg-[var(--primary)]',
+};
+
+export default function Badge({
   children,
   variant = 'default',
   size = 'md',
   dot = false,
   className,
   ...props
-}) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-full transition-colors';
-  
-  const variants = {
-    default: 'bg-surface-100 text-surface-800 dark:bg-surface-800 dark:text-surface-200',
-    primary: 'bg-primary/10 text-primary',
-    success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    danger: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  };
-
-  const sizes = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-0.5',
-  };
-
-  const dotColors = {
-    default: 'bg-surface-500',
-    primary: 'bg-primary',
-    success: 'bg-green-500',
-    warning: 'bg-amber-500',
-    danger: 'bg-red-500',
-    info: 'bg-blue-500',
-  };
-
+}) {
   return (
     <span
-      className={clsx(baseStyles, variants[variant], sizes[size], className)}
+      className={clsx(
+        'inline-flex items-center rounded-[var(--radius-pill)] font-medium',
+        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs',
+        variants[variant] || variants.default,
+        className
+      )}
       {...props}
     >
-      {dot && (
-        <span
-          className={clsx('mr-1.5 h-1.5 w-1.5 rounded-full', dotColors[variant])}
-          aria-hidden="true"
-        />
-      )}
+      {dot && <span className={clsx('mr-1.5 h-1.5 w-1.5 rounded-full', dotColors[variant] || dotColors.default)} aria-hidden="true" />}
       {children}
     </span>
   );
-};
+}
 
-export default Badge;

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">RideMint vehicle image placeholder</title>
+  <desc id="description">A neutral side-view outline used until a credited vehicle photograph is available.</desc>
+  <rect width="1600" height="1000" fill="#EEF1EE"/>
+  <path d="M390 610h820l-70-160c-18-42-58-70-104-74l-386-31c-58-5-114 16-154 58L390 510c-45 9-80 49-80 97v53h92c16-80 87-140 172-140s156 60 172 140h241c16-80 87-140 172-140s156 60 172 140h59v-33c0-64-51-116-115-117l-65-1" fill="none" stroke="#66716C" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="574" cy="660" r="86" fill="#F6F7F5" stroke="#245B4A" stroke-width="24"/>
+  <circle cx="1159" cy="660" r="86" fill="#F6F7F5" stroke="#245B4A" stroke-width="24"/>
+  <path d="M600 392l67 118h386l-54-115" fill="none" stroke="#BEC8C2" stroke-width="22" stroke-linejoin="round"/>
+  <text x="800" y="840" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="38" fill="#66716C">Vehicle image coming soon</text>
+</svg>

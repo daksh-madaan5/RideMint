@@ -1,10 +1,9 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router';
+import { Navigate, Routes, Route } from 'react-router';
 import RootLayout from '@/components/layout/RootLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 import AdminRoute from './AdminRoute';
-import Spinner from '@/components/ui/Spinner';
 
 /* ============================================
    Lazy-loaded Pages (Code Splitting)
@@ -14,10 +13,12 @@ import Spinner from '@/components/ui/Spinner';
 const Home = lazy(() => import('@/pages/Home'));
 const Cars = lazy(() => import('@/pages/Cars'));
 const CarDetails = lazy(() => import('@/pages/CarDetails'));
+const About = lazy(() => import('@/pages/About'));
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Register = lazy(() => import('@/pages/auth/Register'));
 const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+const DesignSystem = lazy(() => import('@/pages/DesignSystem'));
 
 // Protected pages
 const Booking = lazy(() => import('@/pages/Booking'));
@@ -37,8 +38,11 @@ const ManageUsers = lazy(() => import('@/pages/admin/ManageUsers'));
  */
 function PageLoader() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <Spinner size="lg" />
+    <div className="flex min-h-[60vh] items-center justify-center bg-[var(--background)]">
+      <div className="flex items-center gap-3 text-sm font-medium text-[var(--text-secondary)]" role="status">
+        <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border-strong)] border-t-[var(--primary)]" aria-hidden="true" />
+        Loading page…
+      </div>
     </div>
   );
 }
@@ -50,11 +54,14 @@ export default function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
+        <Route path="/design-system" element={<DesignSystem />} />
+
         {/* Public Layout Routes */}
         <Route element={<RootLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/cars" element={<Cars />} />
-          <Route path="/cars/:id" element={<CarDetails />} />
+          <Route path="/cars/:carId" element={<CarDetails />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -69,13 +76,14 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="/bookings"
+            path="/my-bookings"
             element={
               <ProtectedRoute>
                 <BookingHistory />
               </ProtectedRoute>
             }
           />
+          <Route path="/bookings" element={<Navigate to="/my-bookings" replace />} />
           <Route
             path="/favorites"
             element={

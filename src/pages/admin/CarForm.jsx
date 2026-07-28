@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { HiArrowLeft, HiPlus, HiXMark } from 'react-icons/hi2';
 
 import { getCarById, createCar, updateCar } from '@/firebase/cars';
-import { FUEL_TYPES, TRANSMISSION_TYPES } from '@/constants';
+import { FUEL_TYPES, TRANSMISSION_TYPES, SUPPORTED_LOCATIONS } from '@/constants';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -205,10 +205,10 @@ export default function CarForm() {
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Pricing & Location</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Input label="Price Per Day ($)" type="number" placeholder="e.g. 150" error={errors.pricePerDay?.message} {...register('pricePerDay', { valueAsNumber: true })} />
+                  <Input label="Price Per Day (₹)" type="number" placeholder="e.g. 3200" error={errors.pricePerDay?.message} {...register('pricePerDay', { valueAsNumber: true })} />
                 </div>
                 <div>
-                  <Input label="Location" placeholder="e.g. Los Angeles, CA" error={errors.location?.message} {...register('location')} />
+                  <Select label="Location" error={errors.location?.message} options={SUPPORTED_LOCATIONS} placeholder="Select a city" {...register('location')} />
                 </div>
               </div>
               <div className="mt-6 flex items-center gap-3">

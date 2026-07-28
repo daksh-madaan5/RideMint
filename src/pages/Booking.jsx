@@ -37,7 +37,7 @@ export default function Booking() {
     mutationFn: (bookingData) => createBooking(bookingData),
     onSuccess: () => {
       toast.success('Booking confirmed successfully!');
-      navigate('/bookings');
+      navigate('/my-bookings');
     },
     onError: (err) => {
       toast.error('Failed to confirm booking: ' + err.message);
@@ -104,10 +104,10 @@ export default function Booking() {
   };
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Cars', href: '/cars' },
-    { label: `${car.brand} ${car.model}`, href: `/cars/${car.id}` },
-    { label: 'Booking', href: '#' },
+    { label: 'Home', path: '/' },
+    { label: 'Explore Cars', path: '/cars' },
+    { label: `${car.brand} ${car.model}`, path: `/cars/${car.id}` },
+    { label: 'Booking', path: `/booking/${car.id}` },
   ];
 
   return (

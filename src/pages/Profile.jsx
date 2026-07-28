@@ -95,7 +95,7 @@ export default function Profile() {
             </div>
             
             <div className="flex-1 text-center md:text-left">
-              <h2 className="text-2xl font-heading font-bold text-surface-900 dark:text-surface-50">{profile?.name || 'DriveFleet Member'}</h2>
+              <h2 className="text-2xl font-heading font-bold text-surface-900 dark:text-surface-50">{profile?.name || 'RideMint customer'}</h2>
               <div className="flex flex-col md:flex-row gap-2 md:gap-6 mt-2 text-sm text-surface-500 dark:text-surface-400 font-medium">
                 <span className="flex items-center justify-center md:justify-start gap-1.5">
                   <HiOutlineEnvelope className="w-4 h-4 text-surface-400" />

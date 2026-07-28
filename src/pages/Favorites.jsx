@@ -55,8 +55,8 @@ export default function Favorites() {
   };
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Favorites', href: '#' },
+    { label: 'Home', path: '/' },
+    { label: 'Favorites', path: '/favorites' },
   ];
 
   const isLoading = isProfileLoading || isCarsLoading;

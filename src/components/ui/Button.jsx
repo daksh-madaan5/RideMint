@@ -1,104 +1,86 @@
 import { forwardRef } from 'react';
 import { clsx } from 'clsx';
-import { motion } from 'motion/react';
 
 const variants = {
   primary:
-    'bg-primary-900 text-white hover:bg-primary-800 shadow-sm dark:bg-primary-100 dark:text-primary-900 dark:hover:bg-primary-200',
+    'border-transparent bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] active:bg-[var(--primary-active)]',
   secondary:
-    'bg-white text-surface-900 hover:bg-surface-50 border border-surface-200 shadow-sm dark:bg-surface-900 dark:text-surface-100 dark:border-surface-700 dark:hover:bg-surface-800',
+    'border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)]',
   outline:
-    'border border-surface-300 text-surface-700 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800',
+    'border-[var(--border-strong)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]',
   ghost:
-    'text-surface-600 hover:bg-surface-100 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-100',
+    'border-transparent bg-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]',
+  destructive:
+    'border-transparent bg-[var(--danger)] text-white hover:brightness-90',
   danger:
-    'bg-danger text-white hover:bg-red-600 shadow-sm',
+    'border-transparent bg-[var(--danger)] text-white hover:brightness-90',
 };
 
 const sizes = {
-  xs: 'px-3 py-1.5 text-xs rounded-lg h-7',
-  sm: 'px-3 py-2 text-sm rounded-lg h-9',
-  md: 'px-4 py-2 text-sm rounded-xl h-10',
-  lg: 'px-6 py-2.5 text-base rounded-xl h-12',
-  xl: 'px-8 py-3 text-lg rounded-xl h-14',
+  xs: 'h-8 px-3 text-xs',
+  sm: 'h-9 px-3 text-sm',
+  md: 'h-11 px-4 text-sm',
+  lg: 'h-12 px-5 text-base',
+  xl: 'h-12 px-6 text-base',
 };
 
-/**
- * Premium Button component with variants, sizes, loading state, and motion.
- */
-const Button = forwardRef(
-  (
-    {
-      children,
-      variant = 'primary',
-      size = 'md',
-      loading = false,
-      disabled = false,
-      icon: Icon,
-      iconRight: IconRight,
-      fullWidth = false,
-      className,
-      onClick,
-      type = 'button',
-      ...props
-    },
-    ref
-  ) => {
-    const isDisabled = disabled || loading;
+const Button = forwardRef(function Button(
+  {
+    as: Component = 'button',
+    children,
+    variant = 'primary',
+    size = 'md',
+    loading = false,
+    isLoading = false,
+    loadingLabel = 'Loading',
+    disabled = false,
+    icon: Icon,
+    iconRight: IconRight,
+    fullWidth = false,
+    className,
+    type = 'button',
+    ...props
+  },
+  ref
+) {
+  const busy = loading || isLoading;
+  const isDisabled = disabled || busy;
 
-    return (
-      <motion.button
-        ref={ref}
-        type={type}
-        disabled={isDisabled}
-        onClick={onClick}
-        whileHover={!isDisabled ? { scale: 1.02 } : undefined}
-        whileTap={!isDisabled ? { scale: 0.98 } : undefined}
-        className={clsx(
-          'inline-flex items-center justify-center gap-2 font-medium transition-colors cursor-pointer',
-          'focus-ring disabled:opacity-50 disabled:cursor-not-allowed',
-          variants[variant],
-          sizes[size],
-          fullWidth && 'w-full',
-          className
-        )}
-        {...props}
-      >
-        {loading ? (
-          <>
-            <svg
-              className="animate-spin h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            <span>Loading...</span>
-          </>
-        ) : (
-          <>
-            {Icon && <Icon className="h-4 w-4" />}
-            {children}
-            {IconRight && <IconRight className="h-4 w-4" />}
-          </>
-        )}
-      </motion.button>
-    );
-  }
-);
-
-Button.displayName = 'Button';
+  return (
+    <Component
+      ref={ref}
+      type={Component === 'button' ? type : undefined}
+      disabled={Component === 'button' ? isDisabled : undefined}
+      aria-disabled={Component !== 'button' && isDisabled ? true : undefined}
+      aria-busy={busy || undefined}
+      className={clsx(
+        'focus-ring inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-control)] border font-medium',
+        'transition-[background-color,border-color,color,transform,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)]',
+        'hover:-translate-y-px active:translate-y-0 disabled:pointer-events-none disabled:opacity-50',
+        variants[variant] || variants.primary,
+        sizes[size] || sizes.md,
+        fullWidth && 'w-full',
+        className
+      )}
+      {...props}
+    >
+      {busy ? (
+        <>
+          <span
+            className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+            aria-hidden="true"
+          />
+          <span>{loadingLabel}</span>
+        </>
+      ) : (
+        <>
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+          {children}
+          {IconRight && <IconRight className="h-4 w-4" aria-hidden="true" />}
+        </>
+      )}
+    </Component>
+  );
+});
 
 export default Button;

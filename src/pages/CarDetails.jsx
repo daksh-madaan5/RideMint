@@ -1,264 +1,183 @@
-import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router';
-import { motion } from 'motion/react';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  HiOutlineHeart, 
-  HiOutlineChevronRight,
-  HiOutlineCheck,
-  HiOutlineMapPin,
-  HiOutlineCalendar,
-  HiOutlineUserGroup,
-  HiOutlineAdjustmentsHorizontal,
-  HiStar
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import {
+  HiArrowLeft,
+  HiCalendarDays,
+  HiCheck,
+  HiMapPin,
+  HiUsers,
+  HiWrenchScrewdriver,
 } from 'react-icons/hi2';
-import { getCarById } from '@/firebase/cars';
-import { getCarReviews } from '@/firebase/reviews';
-import { useAuth } from '@/hooks/useAuth';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import { formatPrice, getCarImages, getCarFuel } from '@/utils/helpers';
+import ErrorState from '@/components/ui/ErrorState';
+import Skeleton from '@/components/ui/Skeleton';
+import VehicleImage from '@/features/cars/VehicleImage';
+import { useCatalogVehicle } from '@/features/cars/hooks/useCatalogVehicles';
+import { useAuth } from '@/hooks/useAuth';
+import { formatPrice } from '@/utils/helpers';
 
 export default function CarDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { carId } = useParams();
   const { user } = useAuth();
-  const [activeImage, setActiveImage] = useState(0);
-
-  const { data: car, isLoading, error } = useQuery({
-    queryKey: ['car', id],
-    queryFn: () => getCarById(id)
-  });
-
-  const { data: reviews = [] } = useQuery({
-    queryKey: ['reviews', id],
-    queryFn: () => getCarReviews(id),
-    enabled: !!id
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { data: vehicle, isLoading, isError, refetch } = useCatalogVehicle(carId);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-surface-50 dark:bg-surface-950 pt-24 pb-12 animate-pulse">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-8 bg-surface-200 dark:bg-surface-800 rounded w-1/3 mb-8" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="h-[450px] bg-surface-200 dark:bg-surface-800 rounded-2xl" />
-            <div className="space-y-6">
-              <div className="h-12 bg-surface-200 dark:bg-surface-800 rounded w-3/4" />
-              <div className="h-8 bg-surface-200 dark:bg-surface-800 rounded w-1/4" />
-              <div className="h-32 bg-surface-200 dark:bg-surface-800 rounded" />
-            </div>
-          </div>
+      <div className="mx-auto max-w-[var(--content-customer)] px-4 py-12 sm:px-6 lg:px-8" aria-label="Loading vehicle details">
+        <Skeleton className="h-5 w-32" />
+        <div className="mt-8 grid gap-10 lg:grid-cols-2">
+          <Skeleton variant="image" />
+          <div className="space-y-5"><Skeleton className="h-10 w-3/4" /><Skeleton variant="paragraph" /><Skeleton className="h-12 w-full" /></div>
         </div>
       </div>
     );
   }
 
-  if (error || !car) {
+  if (isError) {
+    return <ErrorState className="mx-auto min-h-[60vh] max-w-xl" title="Vehicle details did not load" onRetry={refetch} />;
+  }
+
+  if (!vehicle) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-950 px-4">
-        <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-4">Car not found</h2>
-          <p className="text-surface-600 dark:text-surface-400 mb-6">The vehicle you are looking for does not exist or has been removed.</p>
-          <Button onClick={() => navigate('/cars')}>Back to Catalog</Button>
-        </div>
-      </div>
+      <section className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-4 text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Catalogue fallback</p>
+        <h1 className="mt-3 font-heading text-3xl font-semibold">Vehicle not found</h1>
+        <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+          This catalogue entry does not exist. Return to the fleet to choose another car.
+        </p>
+        <Button as={Link} to="/cars" className="mt-6">Back to cars</Button>
+      </section>
     );
   }
 
-  const carImages = getCarImages(car);
-  const fuelType = getCarFuel(car);
+  const vehicleName = `${vehicle.brand} ${vehicle.model}`;
+  const continueToBooking = () => {
+    if (!user) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    navigate(`/booking/${vehicle.id}`);
+  };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-surface-50 dark:bg-surface-950 pt-24 pb-20"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm text-surface-500 dark:text-surface-400 mb-8 font-medium">
-          <Link to="/" className="hover:text-surface-900 dark:hover:text-surface-100 transition-colors">Home</Link>
-          <HiOutlineChevronRight className="h-4 w-4 mx-2 text-surface-400" />
-          <Link to="/cars" className="hover:text-surface-900 dark:hover:text-surface-100 transition-colors">Cars</Link>
-          <HiOutlineChevronRight className="h-4 w-4 mx-2 text-surface-400" />
-          <span className="text-surface-900 dark:text-surface-100 font-semibold">{car.brand} {car.model}</span>
-        </nav>
+    <div className="mx-auto max-w-[var(--content-customer)] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <Link to="/cars" className="focus-ring inline-flex items-center gap-2 rounded text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+        <HiArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Back to cars
+      </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Left Column: Image Gallery */}
-          <div className="space-y-4">
-            <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-surface-100 dark:bg-surface-900 relative border border-surface-200 dark:border-surface-800 shadow-card">
-              <img 
-                src={carImages[activeImage] || carImages[0]} 
-                alt={`${car.brand} ${car.model}`}
-                className="w-full h-full object-cover transition-all duration-300"
-              />
-              
-              {!car.available && (
-                <div className="absolute top-4 left-4 bg-danger text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md uppercase tracking-wider">
-                  Currently Rented
-                </div>
-              )}
-            </div>
-            
-            {carImages.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {carImages.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(idx)}
-                    className={`aspect-[16/10] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                      activeImage === idx 
-                        ? 'border-primary-900 dark:border-surface-100 shadow-sm' 
-                        : 'border-surface-200 dark:border-surface-800 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Vehicle Info */}
-          <div>
-            <div className="flex justify-between items-start mb-4 gap-4">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-heading font-bold text-surface-900 dark:text-surface-50 tracking-tight mb-2">
-                  {car.brand} {car.model}
-                </h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-surface-600 dark:text-surface-400 font-medium">
-                  <span className="flex items-center gap-1.5">
-                    <HiStar className="h-5 w-5 text-amber-500" />
-                    <span className="font-semibold text-surface-900 dark:text-surface-100">{car.rating || '4.5'}</span>
-                    <span>({reviews.length} reviews)</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <HiOutlineMapPin className="h-5 w-5 text-surface-400" />
-                    {car.location || 'San Francisco, CA'}
-                  </span>
-                </div>
-              </div>
-              <button 
-                aria-label="Toggle Favorite"
-                className="p-3 bg-white dark:bg-surface-900 rounded-full shadow-subtle border border-surface-200 dark:border-surface-800 text-surface-600 dark:text-surface-300 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-              >
-                <HiOutlineHeart className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Price Box */}
-            <div className="my-6 py-6 border-y border-surface-200 dark:border-surface-800">
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-3xl sm:text-4xl font-heading font-bold text-surface-900 dark:text-surface-50">
-                  {formatPrice(car.pricePerDay || 0)}
-                </span>
-                <span className="text-sm font-medium text-surface-500 dark:text-surface-400">/ day</span>
-              </div>
-              <p className="text-xs text-surface-500 dark:text-surface-400">Includes taxes & free cancellation up to 48h before pickup.</p>
-            </div>
-
-            {/* Specs Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-              <div className="bg-white dark:bg-surface-900 p-4 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center text-center">
-                <HiOutlineCalendar className="h-5 w-5 text-surface-500 mb-1" />
-                <span className="text-xs text-surface-500 font-medium">Year</span>
-                <span className="font-semibold text-surface-900 dark:text-surface-100">{car.year}</span>
-              </div>
-              <div className="bg-white dark:bg-surface-900 p-4 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center text-center">
-                <HiOutlineUserGroup className="h-5 w-5 text-surface-500 mb-1" />
-                <span className="text-xs text-surface-500 font-medium">Capacity</span>
-                <span className="font-semibold text-surface-900 dark:text-surface-100">{car.seats || 4} Seats</span>
-              </div>
-              <div className="bg-white dark:bg-surface-900 p-4 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center text-center">
-                <HiOutlineAdjustmentsHorizontal className="h-5 w-5 text-surface-500 mb-1" />
-                <span className="text-xs text-surface-500 font-medium">Transmission</span>
-                <span className="font-semibold text-surface-900 dark:text-surface-100">{car.transmission || 'Automatic'}</span>
-              </div>
-              <div className="bg-white dark:bg-surface-900 p-4 rounded-xl border border-surface-200 dark:border-surface-800 flex flex-col items-center justify-center text-center">
-                <span className="text-base font-bold text-surface-500 mb-1">⛽</span>
-                <span className="text-xs text-surface-500 font-medium">Fuel Type</span>
-                <span className="font-semibold text-surface-900 dark:text-surface-100">{fuelType}</span>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="mb-8">
-              <h3 className="text-lg font-heading font-bold text-surface-900 dark:text-surface-50 mb-2">About Vehicle</h3>
-              <p className="text-surface-600 dark:text-surface-400 text-sm leading-relaxed">
-                {car.description || `Experience the thrill of driving the ${car.brand} ${car.model}. This premium vehicle offers unmatched comfort, advanced safety features, and incredible performance.`}
-              </p>
-            </div>
-
-            {/* Features List */}
-            <div className="mb-8">
-              <h3 className="text-lg font-heading font-bold text-surface-900 dark:text-surface-50 mb-3">Key Features</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {(car.features || ['Bluetooth', 'Backup Camera', 'Leather Seats', 'Navigation System', 'Apple CarPlay', 'Heated Seats']).map((feature, i) => (
-                  <div key={i} className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-surface-700 dark:text-surface-300">
-                    <div className="h-5 w-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                      <HiOutlineCheck className="h-3 w-3" />
-                    </div>
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Booking CTA */}
-            <div className="flex gap-4">
-              <Button 
-                as={Link} 
-                to={`/booking/${car.id}`} 
-                size="lg" 
-                fullWidth
-                disabled={!car.available}
-              >
-                {car.available ? 'Rent This Vehicle' : 'Currently Unavailable'}
-              </Button>
-            </div>
-          </div>
+      <div className="mt-7 grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+        <div>
+          <VehicleImage src={vehicle.image} alt={`${vehicleName} rental vehicle`} className="rounded-[var(--radius-panel)] border border-[var(--border)]" eager />
+          <section className="mt-8" aria-labelledby="specifications-title">
+            <h2 id="specifications-title" className="font-heading text-xl font-semibold">Vehicle specifications</h2>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {vehicle.specifications.map((specification) => (
+                <li key={specification} className="flex items-center gap-3 rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
+                  <HiCheck className="h-4 w-4 shrink-0 text-[var(--primary)]" aria-hidden="true" />
+                  {specification}
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
 
-        {/* Reviews Section */}
-        <div className="mt-16 pt-12 border-t border-surface-200 dark:border-surface-800">
-          <h2 className="text-2xl font-heading font-bold text-surface-900 dark:text-surface-50 mb-6">Customer Reviews</h2>
-          {reviews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reviews.map((review) => (
-                <div key={review.id} className="bg-white dark:bg-surface-900 p-6 rounded-2xl border border-surface-200 dark:border-surface-800">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center font-bold text-surface-700 dark:text-surface-300">
-                        {review.userName?.[0] || 'U'}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-surface-900 dark:text-surface-100 text-sm">{review.userName || 'User'}</p>
-                        <p className="text-xs text-surface-500">{new Date(review.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex text-amber-500">
-                      {[...Array(5)].map((_, i) => (
-                        <HiStar key={i} className={`h-4 w-4 ${i < review.rating ? '' : 'text-surface-300 dark:text-surface-700'}`} />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-surface-600 dark:text-surface-400 text-sm leading-relaxed">{review.comment}</p>
-                </div>
-              ))}
+        <div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">{vehicle.category}</p>
+              <h1 className="mt-2 font-heading text-4xl font-semibold tracking-tight">{vehicleName}</h1>
             </div>
-          ) : (
-            <div className="bg-white dark:bg-surface-900 p-8 rounded-2xl text-center border border-surface-200 dark:border-surface-800 max-w-lg mx-auto">
-              <p className="text-surface-500 dark:text-surface-400 text-sm mb-4">No reviews yet for this vehicle.</p>
-              {user ? (
-                <Button variant="outline" size="sm">Write First Review</Button>
-              ) : (
-                <p className="text-xs text-surface-500"><Link to="/login" className="text-primary-600 underline">Log in</Link> to share your review.</p>
-              )}
-            </div>
-          )}
+            <Badge variant={vehicle.available ? 'success' : 'default'} dot={vehicle.available}>
+              {vehicle.available ? 'Available' : 'Unavailable'}
+            </Badge>
+          </div>
+
+          <p className="mt-5 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+            <HiMapPin className="h-5 w-5 text-[var(--primary)]" aria-hidden="true" />
+            {vehicle.branch.name}
+          </p>
+
+          <div className="my-7 border-y border-[var(--border)] py-6">
+            <p className="text-sm text-[var(--text-secondary)]">Daily rental from</p>
+            <p className="mt-1 font-heading text-4xl font-semibold tracking-tight">
+              {formatPrice(vehicle.pricePerDay)}
+              <span className="ml-2 font-body text-sm font-normal text-[var(--text-secondary)]">per day</span>
+            </p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">Demo rate. Final totals are calculated in the booking flow.</p>
+          </div>
+
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Spec icon={HiCalendarDays} label="Year" value={vehicle.year} />
+            <Spec icon={HiUsers} label="Seats" value={vehicle.seats} />
+            <Spec icon={HiWrenchScrewdriver} label="Gearbox" value={vehicle.transmission} />
+            <Spec label="Fuel" value={vehicle.fuelType} />
+          </dl>
+
+          <section className="mt-8 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5" aria-labelledby="pickup-title">
+            <h2 id="pickup-title" className="font-heading text-lg font-semibold">Pickup information</h2>
+            <dl className="mt-4 space-y-3 text-sm">
+              <DetailRow term="City" detail={vehicle.branch.city} />
+              <DetailRow term="Address" detail={vehicle.branch.address || 'Demo information not supplied'} />
+              <DetailRow term="Operating hours" detail={vehicle.branch.operatingHours || 'Demo information not supplied'} />
+            </dl>
+          </section>
+
+          <div className="mt-6">
+            <Button fullWidth size="lg" disabled={!vehicle.available} onClick={continueToBooking}>
+              {vehicle.available ? (user ? 'Continue to booking' : 'Sign in to continue') : 'Currently unavailable'}
+            </Button>
+            <p className="mt-3 text-center text-sm text-[var(--text-secondary)]">
+              {vehicle.available
+                ? 'You can browse without an account. Sign-in is required only to continue to booking.'
+                : 'This demo vehicle cannot enter the booking flow while marked unavailable.'}
+            </p>
+          </div>
         </div>
       </div>
-    </motion.div>
+
+      <section className="mt-14 border-t border-[var(--border)] pt-10" aria-labelledby="policies-title">
+        <h2 id="policies-title" className="font-heading text-2xl font-semibold">Rental details</h2>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <Policy title="Rental terms" text={vehicle.rentalTerms} />
+          <Policy title="Fuel policy" text={vehicle.fuelPolicy} />
+          <Policy title="Security deposit" text={vehicle.securityDeposit} />
+          <Policy title="Cancellation" text={vehicle.cancellationPolicy} />
+        </div>
+        <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]">
+          Need help understanding a rental detail? RideMint support information will be presented before confirmation; no support number is supplied in this demo catalogue.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function Spec({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--surface)] p-3">
+      {Icon && <Icon className="mb-2 h-4 w-4 text-[var(--primary)]" aria-hidden="true" />}
+      <dt className="text-xs text-[var(--text-tertiary)]">{label}</dt>
+      <dd className="mt-1 text-sm font-semibold">{value}</dd>
+    </div>
+  );
+}
+
+function DetailRow({ term, detail }) {
+  return (
+    <div className="grid grid-cols-[7rem_1fr] gap-3">
+      <dt className="text-[var(--text-tertiary)]">{term}</dt>
+      <dd className="font-medium text-[var(--text-primary)]">{detail}</dd>
+    </div>
+  );
+}
+
+function Policy({ title, text }) {
+  return (
+    <article className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5">
+      <h3 className="font-heading text-lg font-semibold">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{text}</p>
+    </article>
   );
 }

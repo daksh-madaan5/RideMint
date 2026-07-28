@@ -1,67 +1,61 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import { clsx } from 'clsx';
 import { HiChevronDown } from 'react-icons/hi2';
 
-/**
- * Styled Select dropdown component.
- */
-const Select = forwardRef(
-  ({ label, error, options = [], placeholder, className, containerClassName, id, ...props }, ref) => {
-    const selectId = id || label?.toLowerCase().replace(/\s+/g, '-');
+const Select = forwardRef(function Select(
+  { label, supportingText, error, options = [], placeholder, children, className, containerClassName, id, required, ...props },
+  ref
+) {
+  const generatedId = useId();
+  const selectId = id || `select-${generatedId}`;
+  const helperId = `${selectId}-helper`;
+  const errorId = `${selectId}-error`;
 
-    return (
-      <div className={clsx('w-full', containerClassName)}>
-        {label && (
-          <label
-            htmlFor={selectId}
-            className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5"
-          >
-            {label}
-          </label>
-        )}
-        <div className="relative">
-          <select
-            ref={ref}
-            id={selectId}
-            className={clsx(
-              'w-full appearance-none bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl',
-              'px-4 py-2.5 pr-10 text-sm h-11 text-surface-900 dark:text-surface-100',
-              'transition-all duration-200',
-              'focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
-              'hover:border-surface-300 dark:hover:border-surface-600',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              error && 'border-danger focus:ring-danger/50',
-              className
-            )}
-            {...props}
-          >
-            {placeholder && (
-              <option value="" className="text-surface-500">
-                {placeholder}
-              </option>
-            )}
-            {options.map((opt) => {
-              const value = typeof opt === 'string' ? opt : opt.value;
-              const label = typeof opt === 'string' ? opt : opt.label;
-              return (
-                <option key={value} value={value} className="bg-white dark:bg-surface-900">
-                  {label}
-                </option>
-              );
-            })}
-          </select>
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <HiChevronDown className="h-4 w-4 text-surface-500" />
-          </div>
-        </div>
-        {error && (
-          <p className="mt-1 text-xs text-danger">{error}</p>
-        )}
+  return (
+    <div className={clsx('w-full', containerClassName)}>
+      {label && (
+        <label htmlFor={selectId} className="type-label mb-2 block text-[var(--text-primary)]">
+          {label}
+          {required && <span className="ml-1 text-[var(--danger)]" aria-hidden="true">*</span>}
+        </label>
+      )}
+      <div className="relative">
+        <select
+          ref={ref}
+          id={selectId}
+          required={required}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : supportingText ? helperId : undefined}
+          className={clsx(
+            'h-11 w-full appearance-none rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--surface)] px-3 pr-10 text-base text-[var(--text-primary)] sm:text-sm',
+            'transition-[border-color,box-shadow,background-color] duration-[var(--duration-normal)]',
+            'hover:border-[var(--border-strong)] focus:border-[var(--primary)] focus:outline-none focus:ring-3 focus:ring-[color-mix(in_srgb,var(--primary)_18%,transparent)]',
+            'disabled:cursor-not-allowed disabled:bg-[var(--surface-subtle)] disabled:text-[var(--text-tertiary)]',
+            error && 'border-[var(--danger)] focus:border-[var(--danger)]',
+            className
+          )}
+          {...props}
+        >
+          {children || (
+            <>
+              {placeholder && <option value="">{placeholder}</option>}
+              {options.map((option) => {
+                const value = typeof option === 'string' ? option : option.value;
+                const optionLabel = typeof option === 'string' ? option : option.label;
+                return <option key={value} value={value}>{optionLabel}</option>;
+              })}
+            </>
+          )}
+        </select>
+        <HiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]" aria-hidden="true" />
       </div>
-    );
-  }
-);
-
-Select.displayName = 'Select';
+      {error ? (
+        <p id={errorId} className="mt-2 text-sm text-[var(--danger)]">{error}</p>
+      ) : supportingText ? (
+        <p id={helperId} className="type-caption mt-2">{supportingText}</p>
+      ) : null}
+    </div>
+  );
+});
 
 export default Select;

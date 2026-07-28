@@ -56,10 +56,10 @@ export default function AdminLayout() {
         <div className="flex items-center justify-between px-6 h-16 border-b border-surface-800/50">
           <Link to="/admin" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">DF</span>
+              <span className="text-white font-bold text-sm">RM</span>
             </div>
             <span className="text-lg font-heading font-bold text-surface-100">
-              Admin
+              RideMint Admin
             </span>
           </Link>
           <button

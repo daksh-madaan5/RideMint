@@ -11,14 +11,22 @@ export const SORT_OPTIONS = [
 export const BOOKING_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled'];
 export const NAV_LINKS = [
   { label: 'Home', path: '/' },
-  { label: 'Cars', path: '/cars' },
-  { label: 'About', path: '/about' },
-  { label: 'Contact', path: '/contact' },
+  { label: 'Explore Cars', path: '/cars' },
 ];
+export const SUPPORTED_LOCATIONS = [
+  'Bengaluru',
+  'Hyderabad',
+  'Mumbai',
+  'Delhi NCR',
+  'Pune',
+  'Chennai',
+  'Bhubaneswar',
+];
+export const DEFAULT_LOCATION = 'Bengaluru';
 export const PRICE_RANGES = [
-  { label: 'Under $50', min: 0, max: 50 },
-  { label: '$50 - $100', min: 50, max: 100 },
-  { label: '$100 - $200', min: 100, max: 200 },
-  { label: '$200 - $500', min: 200, max: 500 },
-  { label: '$500+', min: 500, max: Infinity },
+  { label: 'Under ₹2,000', min: 0, max: 2000 },
+  { label: '₹2,000–₹4,000', min: 2000, max: 4000 },
+  { label: '₹4,000–₹7,000', min: 4000, max: 7000 },
+  { label: '₹7,000–₹10,000', min: 7000, max: 10000 },
+  { label: '₹10,000+', min: 10000, max: Infinity },
 ];

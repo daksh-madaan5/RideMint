@@ -1,64 +1,54 @@
-import React from 'react';
 import { HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import Modal from './Modal';
-import Spinner from './Spinner';
-import clsx from 'clsx';
+import Button from './Button';
 
-export const ConfirmDialog = ({
+export default function ConfirmDialog({
   isOpen,
   onClose,
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm',
+  description,
+  confirmLabel,
+  confirmText,
   cancelLabel = 'Cancel',
   loading = false,
-  danger = true
-}) => {
+  isLoading = false,
+  danger = true,
+  confirmVariant,
+}) {
+  const busy = loading || isLoading;
+  const body = message || description;
+  const actionLabel = confirmLabel || confirmText || 'Confirm';
+  const destructive = confirmVariant === 'danger' || confirmVariant === 'destructive' || danger;
+
   return (
-    <Modal isOpen={isOpen} onClose={loading ? undefined : onClose} size="sm">
-      <div className="p-6">
-        <div className="flex items-start gap-4">
-          <div className={clsx(
-            "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full",
-            danger ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-500" : "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-500"
-          )}>
-            <HiOutlineExclamationTriangle className="h-6 w-6" />
-          </div>
-          <div className="flex-1 pt-1">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {title}
-            </h3>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {message}
-            </p>
-          </div>
+    <Modal isOpen={isOpen} onClose={busy ? undefined : onClose} size="sm" showClose={false}>
+      <div className="flex items-start gap-4">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-control)] ${
+          destructive
+            ? 'bg-[var(--danger-subtle)] text-[var(--danger)]'
+            : 'bg-[var(--warning-subtle)] text-[var(--warning)]'
+        }`}>
+          <HiOutlineExclamationTriangle className="h-5 w-5" aria-hidden="true" />
         </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={loading}
-            className={clsx(
-              "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-70",
-              danger ? "bg-red-600 hover:bg-red-700 focus:ring-red-500" : "bg-primary hover:bg-primary/90 focus:ring-primary"
-            )}
-          >
-            {loading && <Spinner size="sm" className="mr-2 border-white/20 border-t-white" />}
-            {confirmLabel}
-          </button>
+        <div>
+          <h2 className="type-card-heading">{title}</h2>
+          {body && <p className="type-supporting mt-2">{body}</p>}
         </div>
+      </div>
+      <div className="mt-6 flex justify-end gap-2">
+        <Button variant="ghost" onClick={onClose} disabled={busy}>{cancelLabel}</Button>
+        <Button
+          variant={destructive ? 'destructive' : 'primary'}
+          onClick={onConfirm}
+          loading={busy}
+          loadingLabel="Working"
+        >
+          {actionLabel}
+        </Button>
       </div>
     </Modal>
   );
-};
+}
 
-export default ConfirmDialog;

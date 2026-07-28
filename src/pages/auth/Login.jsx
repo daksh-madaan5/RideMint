@@ -69,7 +69,7 @@ export default function Login() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl lg:text-5xl font-heading font-bold mb-4 tracking-tight leading-tight"
           >
-            Welcome Back to DriveFleet
+            Welcome back to RideMint
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}

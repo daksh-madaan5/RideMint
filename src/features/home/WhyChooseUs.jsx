@@ -35,7 +35,7 @@ export default function WhyChooseUs() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-white">Why Choose DriveFleet</h2>
+          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-white">Why choose RideMint</h2>
           <p className="text-surface-400 text-lg mt-4 max-w-2xl mx-auto">Experience the pinnacle of car rental service</p>
         </div>
 

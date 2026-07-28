@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     question: "What documents do I need?",
-    answer: "You will need a valid driver's license, a major credit card in your name, and proof of insurance if you're declining our coverage. International renters may require an International Driving Permit."
+    answer: "You will need a valid driving licence and the booking documents specified during confirmation. Final eligibility requirements will be documented before launch."
   },
   {
     question: "Can I cancel my booking?",
@@ -38,7 +38,7 @@ export default function FAQSection() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-heading font-bold text-white">Frequently Asked Questions</h2>
-          <p className="text-surface-400 text-lg mt-4">Everything you need to know about renting with DriveFleet</p>
+          <p className="text-surface-400 text-lg mt-4">Common questions about renting with RideMint</p>
         </div>
 
         <div className="space-y-4">

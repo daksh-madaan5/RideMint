@@ -1,7 +1,7 @@
-import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import AppRouter from '@/routes/AppRouter';
+import ToastViewport from '@/components/ui/Toast';
 
 /**
  * Root application component.
@@ -12,19 +12,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <AppRouter />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-          toastClassName="!bg-surface-800 !text-surface-100 !rounded-xl !shadow-2xl !border !border-surface-700/50"
-        />
+        <ToastViewport />
       </AuthProvider>
     </ThemeProvider>
   );

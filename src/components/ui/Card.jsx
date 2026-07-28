@@ -1,64 +1,57 @@
 import { clsx } from 'clsx';
-import { motion } from 'motion/react';
 
-/**
- * Glassmorphic Card component with optional hover lift animation.
- */
 export default function Card({
   children,
   className,
-  hover = true,
+  hover = false,
   padding = true,
-  glass = true,
+  glass: _glass,
   onClick,
-  as = 'div',
+  as: Component = 'div',
+  ...props
 }) {
-  const Component = onClick ? motion.div : as === 'article' ? motion.article : motion.div;
+  const interactiveProps = onClick
+    ? {
+        role: 'button',
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick(event);
+          }
+        },
+      }
+    : {};
 
   return (
     <Component
-      onClick={onClick}
-      whileHover={hover ? { y: -4 } : undefined}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={clsx(
-        'rounded-2xl overflow-hidden',
-        'bg-white dark:bg-surface-900',
-        glass && 'border border-surface-200 dark:border-surface-800 shadow-sm',
-        hover && 'hover:shadow-card-hover cursor-pointer',
-        padding && 'p-6',
+        'overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-subtle)]',
+        hover && 'hover-lift',
         onClick && 'cursor-pointer',
+        padding && 'p-5 sm:p-6',
         className
       )}
+      {...interactiveProps}
+      {...props}
     >
       {children}
     </Component>
   );
 }
 
-/**
- * Card Header sub-component.
- */
 Card.Header = function CardHeader({ children, className }) {
-  return (
-    <div className={clsx('mb-4', className)}>
-      {children}
-    </div>
-  );
+  return <div className={clsx('mb-4', className)}>{children}</div>;
 };
 
-/**
- * Card Body sub-component.
- */
 Card.Body = function CardBody({ children, className }) {
-  return <div className={clsx(className)}>{children}</div>;
+  return <div className={className}>{children}</div>;
 };
 
-/**
- * Card Footer sub-component.
- */
 Card.Footer = function CardFooter({ children, className }) {
   return (
-    <div className={clsx('mt-4 pt-4 border-t border-surface-700/50', className)}>
+    <div className={clsx('mt-5 border-t border-[var(--border)] pt-4', className)}>
       {children}
     </div>
   );
