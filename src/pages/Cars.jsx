@@ -74,9 +74,9 @@ export default function Cars() {
   return (
     <div className="mx-auto max-w-[var(--content-customer)] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <PageHeader
-        eyebrow="RideMint fleet"
+        eyebrow="Cars near you"
         title="Explore cars"
-        description="Compare company-owned vehicles using the details that matter for your trip."
+        description="Compare cars listed by local hosts using the details that matter for your trip."
       />
 
       {dateContext && (
@@ -102,7 +102,7 @@ export default function Cars() {
                 <h2 id="catalog-results" className="text-sm font-semibold text-[var(--text-primary)]">
                   {isLoading ? 'Loading vehicles…' : `${filteredVehicles.length} ${filteredVehicles.length === 1 ? 'vehicle' : 'vehicles'}`}
                 </h2>
-                <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">Demo catalogue availability</p>
+                <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">Approved marketplace listings and demo fallback cars</p>
               </div>
             </div>
             <Select
@@ -124,7 +124,7 @@ export default function Cars() {
           {isError && (
             <ErrorState
               className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
-              title="The fleet did not load"
+              title="The car catalogue did not load"
               description="Please retry the demo catalogue request."
               onRetry={refetch}
             />

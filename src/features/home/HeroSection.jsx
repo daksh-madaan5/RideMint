@@ -41,12 +41,12 @@ export default function HeroSection() {
     <section className="border-b border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto grid max-w-[var(--content-customer)] gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-16 lg:px-8 lg:py-24">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Company-owned self-drive cars</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Self-drive cars near you</p>
           <h1 className="mt-4 max-w-2xl font-heading text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
             The right car for the road ahead.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-[var(--text-secondary)]">
-            Browse a practical fleet by city, compare clear daily rates, and review the important rental details before you book.
+            Browse cars from local hosts by city, compare clear daily rates, and review practical listing details.
           </p>
         </div>
 

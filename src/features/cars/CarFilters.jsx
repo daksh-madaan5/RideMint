@@ -1,12 +1,14 @@
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
-import { SUPPORTED_LOCATIONS } from '@/constants';
+import {
+  FUEL_TYPES,
+  LISTING_CATEGORIES,
+  LISTING_SEAT_OPTIONS,
+  SUPPORTED_LOCATIONS,
+  TRANSMISSION_TYPES,
+} from '@/constants';
 import {
   CATALOG_PRICE_RANGES,
-  VEHICLE_CATEGORIES,
-  VEHICLE_FUEL_TYPES,
-  VEHICLE_SEAT_OPTIONS,
-  VEHICLE_TRANSMISSIONS,
 } from './data/demoVehicles';
 
 export default function CarFilters({ filters, onChange, onClear, className = '' }) {
@@ -34,28 +36,28 @@ export default function CarFilters({ filters, onChange, onClear, className = '' 
         label="Category"
         value={filters.category}
         onChange={(event) => onChange('category', event.target.value)}
-        options={VEHICLE_CATEGORIES}
+        options={LISTING_CATEGORIES}
         placeholder="All categories"
       />
       <Select
         label="Transmission"
         value={filters.transmission}
         onChange={(event) => onChange('transmission', event.target.value)}
-        options={VEHICLE_TRANSMISSIONS}
+        options={TRANSMISSION_TYPES}
         placeholder="Any transmission"
       />
       <Select
         label="Fuel type"
         value={filters.fuelType}
         onChange={(event) => onChange('fuelType', event.target.value)}
-        options={VEHICLE_FUEL_TYPES}
+        options={FUEL_TYPES}
         placeholder="Any fuel type"
       />
       <Select
         label="Seats"
         value={filters.seats}
         onChange={(event) => onChange('seats', event.target.value)}
-        options={VEHICLE_SEAT_OPTIONS.map((seats) => ({ value: String(seats), label: `${seats} seats` }))}
+        options={LISTING_SEAT_OPTIONS.map((seats) => ({ value: String(seats), label: `${seats} seats` }))}
         placeholder="Any capacity"
       />
       <Select
@@ -68,4 +70,3 @@ export default function CarFilters({ filters, onChange, onClear, className = '' 
     </form>
   );
 }
-

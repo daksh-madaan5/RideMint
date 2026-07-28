@@ -26,6 +26,8 @@ const createDemoBranch = (city) => ({
 export const DEMO_VEHICLES = [
   {
     id: 'swift',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Maruti Suzuki',
     model: 'Swift',
     year: 2025,
@@ -43,6 +45,8 @@ export const DEMO_VEHICLES = [
   },
   {
     id: 'creta',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Hyundai',
     model: 'Creta',
     year: 2025,
@@ -60,6 +64,8 @@ export const DEMO_VEHICLES = [
   },
   {
     id: 'city',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Honda',
     model: 'City',
     year: 2024,
@@ -77,6 +83,8 @@ export const DEMO_VEHICLES = [
   },
   {
     id: 'thar',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Mahindra',
     model: 'Thar',
     year: 2024,
@@ -94,10 +102,12 @@ export const DEMO_VEHICLES = [
   },
   {
     id: 'nexon',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Tata',
     model: 'Nexon',
     year: 2025,
-    category: 'Compact SUV',
+    category: 'SUV',
     transmission: 'Automatic',
     fuelType: 'Petrol',
     seats: 5,
@@ -111,10 +121,12 @@ export const DEMO_VEHICLES = [
   },
   {
     id: 'innova',
+    source: 'legacy-demo',
+    ownerSnapshot: { displayName: 'Demo host', photoURL: '', emailVerified: null },
     brand: 'Toyota',
     model: 'Innova Crysta',
     year: 2024,
-    category: 'MPV',
+    category: 'MUV',
     transmission: 'Manual',
     fuelType: 'Diesel',
     seats: 7,
@@ -138,4 +150,3 @@ export const CATALOG_PRICE_RANGES = [
   { value: '3000-4500', label: '₹3,000–₹4,500' },
   { value: '4500-6000', label: '₹4,500–₹6,000' },
 ];
-

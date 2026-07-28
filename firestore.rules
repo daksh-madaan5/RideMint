@@ -1,0 +1,158 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function admin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function validImage(image) {
+      return image is map
+        && image.keys().hasOnly(['url', 'publicId', 'assetId', 'width', 'height', 'format'])
+        && image.url is string
+        && image.publicId is string
+        && image.assetId is string
+        && image.width is int
+        && image.height is int
+        && image.format is string;
+    }
+
+    function validImages(images) {
+      return images is list
+        && images.size() >= 1
+        && images.size() <= 4
+        && validImage(images[0])
+        && (images.size() < 2 || validImage(images[1]))
+        && (images.size() < 3 || validImage(images[2]))
+        && (images.size() < 4 || validImage(images[3]));
+    }
+
+    function validListingValues(data) {
+      return data.ownerId is string
+        && data.ownerSnapshot is map
+        && data.ownerSnapshot.keys().hasOnly(['displayName', 'photoURL', 'emailVerified'])
+        && data.ownerSnapshot.displayName is string
+        && data.ownerSnapshot.photoURL is string
+        && data.ownerSnapshot.emailVerified is bool
+        && data.make is string
+        && data.make.size() >= 2
+        && data.model is string
+        && data.model.size() >= 1
+        && data.year is int
+        && data.year >= 1990
+        && data.year <= 2100
+        && data.category in ['Hatchback', 'Sedan', 'SUV', 'MUV']
+        && data.city in ['Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi NCR', 'Pune', 'Chennai', 'Bhubaneswar']
+        && data.transmission in ['Manual', 'Automatic']
+        && data.fuelType in ['Petrol', 'Diesel', 'Electric', 'CNG']
+        && data.seats is int
+        && data.seats >= 2
+        && data.seats <= 10
+        && data.pricePerDay is number
+        && data.pricePerDay > 0
+        && data.pricePerDay <= 100000
+        && data.description is string
+        && data.description.size() >= 80
+        && data.description.size() <= 1200
+        && validImages(data.images)
+        && data.listingStatus in ['pending', 'approved', 'rejected', 'inactive']
+        && data.availabilityStatus in ['available', 'unavailable'];
+    }
+
+    function publicListing() {
+      return resource.data.listingStatus == 'approved'
+        && resource.data.availabilityStatus == 'available';
+    }
+
+    function owner() {
+      return signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    function ownerUpdateAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let availabilityOnly = changed.hasOnly(['availabilityStatus', 'updatedAt'])
+        && request.resource.data.listingStatus == resource.data.listingStatus;
+      let deactivateOnly = changed.hasOnly(['listingStatus', 'updatedAt'])
+        && request.resource.data.listingStatus == 'inactive';
+      let reactivateOnly = resource.data.listingStatus == 'inactive'
+        && changed.hasOnly(['listingStatus', 'availabilityStatus', 'updatedAt'])
+        && request.resource.data.listingStatus == 'pending'
+        && request.resource.data.availabilityStatus == 'available';
+      let resubmitOrEdit = changed.hasOnly([
+          'make', 'model', 'year', 'category', 'city', 'transmission',
+          'fuelType', 'seats', 'pricePerDay', 'description', 'images',
+          'availabilityStatus', 'listingStatus', 'rejectionReason', 'updatedAt'
+        ])
+        && request.resource.data.listingStatus == 'pending'
+        && request.resource.data.rejectionReason == null;
+
+      return request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.ownerSnapshot == resource.data.ownerSnapshot
+        && request.resource.data.updatedAt == request.time
+        && validListingValues(request.resource.data)
+        && (availabilityOnly || deactivateOnly || reactivateOnly || resubmitOrEdit);
+    }
+
+    function adminModerationAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.listingStatus in ['approved', 'rejected']
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.moderatedAt == request.time
+        && request.resource.data.moderatedBy == request.auth.uid
+        && (request.resource.data.listingStatus == 'approved'
+          ? request.resource.data.rejectionReason == null
+          : request.resource.data.rejectionReason is string
+            && request.resource.data.rejectionReason.size() > 0)
+        && changed.hasOnly([
+          'listingStatus', 'rejectionReason', 'moderatedAt',
+          'moderatedBy', 'updatedAt'
+        ]);
+    }
+
+    match /vehicleListings/{listingId} {
+      allow read: if publicListing() || owner() || admin();
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'ownerId', 'ownerSnapshot', 'make', 'model', 'year', 'category',
+          'city', 'transmission', 'fuelType', 'seats', 'pricePerDay',
+          'description', 'images', 'listingStatus', 'availabilityStatus',
+          'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.listingStatus == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && validListingValues(request.resource.data);
+
+      allow update: if (owner() && ownerUpdateAllowed())
+        || (admin() && adminModerationAllowed());
+
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || admin());
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == 'user';
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // Existing collections require a separate rules audit before this new file
+    // can replace any production ruleset.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

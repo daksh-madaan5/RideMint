@@ -14,8 +14,8 @@ export default function FeaturedCars() {
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-[var(--content-customer)] px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          title="A fleet for everyday journeys"
-          description="A first look at RideMint vehicles available across our demo cities."
+          title="Cars for everyday journeys"
+          description="A first look at approved host listings and demo cars across supported cities."
           action={
             <Button as={Link} to="/cars" variant="outline" iconRight={HiArrowRight}>
               View all cars
@@ -30,7 +30,7 @@ export default function FeaturedCars() {
             ))}
           </div>
         )}
-        {isError && <ErrorState className="mt-8" onRetry={refetch} description="The demo fleet could not be loaded." />}
+        {isError && <ErrorState className="mt-8" onRetry={refetch} description="The car catalogue could not be loaded." />}
         {!isLoading && !isError && (
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {vehicles.slice(0, 3).map((vehicle) => <CarCard key={vehicle.id} car={vehicle} />)}

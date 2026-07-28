@@ -25,6 +25,8 @@ const Booking = lazy(() => import('@/pages/Booking'));
 const BookingHistory = lazy(() => import('@/pages/BookingHistory'));
 const Favorites = lazy(() => import('@/pages/Favorites'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const ListYourCar = lazy(() => import('@/pages/ListYourCar'));
+const MyListings = lazy(() => import('@/pages/MyListings'));
 
 // Admin pages
 const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
@@ -32,6 +34,7 @@ const ManageCars = lazy(() => import('@/pages/admin/ManageCars'));
 const CarForm = lazy(() => import('@/pages/admin/CarForm'));
 const ManageBookings = lazy(() => import('@/pages/admin/ManageBookings'));
 const ManageUsers = lazy(() => import('@/pages/admin/ManageUsers'));
+const ModerateListings = lazy(() => import('@/pages/admin/ModerateListings'));
 
 /**
  * Page-level loading fallback.
@@ -85,6 +88,30 @@ export default function AppRouter() {
           />
           <Route path="/bookings" element={<Navigate to="/my-bookings" replace />} />
           <Route
+            path="/list-your-car"
+            element={
+              <ProtectedRoute>
+                <ListYourCar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/list-your-car/:listingId"
+            element={
+              <ProtectedRoute>
+                <ListYourCar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-listings"
+            element={
+              <ProtectedRoute>
+                <MyListings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/favorites"
             element={
               <ProtectedRoute>
@@ -119,6 +146,7 @@ export default function AppRouter() {
           <Route path="/admin/cars/edit/:id" element={<CarForm />} />
           <Route path="/admin/bookings" element={<ManageBookings />} />
           <Route path="/admin/users" element={<ManageUsers />} />
+          <Route path="/admin/listings" element={<ModerateListings />} />
         </Route>
       </Routes>
     </Suspense>

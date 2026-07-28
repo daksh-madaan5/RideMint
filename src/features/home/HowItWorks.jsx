@@ -5,17 +5,17 @@ const steps = [
   {
     icon: HiMagnifyingGlass,
     title: 'Find your fit',
-    description: 'Filter the RideMint fleet by city, body style, gearbox, fuel type, seats, and daily price.',
+    description: 'Filter nearby listings by city, body style, gearbox, fuel type, seats, and daily price.',
   },
   {
     icon: HiCalendarDays,
     title: 'Review the details',
-    description: 'Check availability, specifications, pickup information, and demo policies before continuing.',
+    description: 'Check availability, specifications, host information, and listing details before continuing.',
   },
   {
     icon: HiKey,
     title: 'Continue securely',
-    description: 'Sign in when you are ready to move from browsing to the protected booking flow.',
+    description: 'Sign in to continue when a future car-request flow is available.',
   },
 ];
 

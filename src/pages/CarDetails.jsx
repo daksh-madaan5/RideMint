@@ -8,6 +8,7 @@ import {
   HiWrenchScrewdriver,
 } from 'react-icons/hi2';
 import Badge from '@/components/ui/Badge';
+import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import ErrorState from '@/components/ui/ErrorState';
 import Skeleton from '@/components/ui/Skeleton';
@@ -45,7 +46,7 @@ export default function CarDetails() {
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Catalogue fallback</p>
         <h1 className="mt-3 font-heading text-3xl font-semibold">Vehicle not found</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-          This catalogue entry does not exist. Return to the fleet to choose another car.
+          This catalogue entry does not exist. Return to Explore cars to choose another listing.
         </p>
         <Button as={Link} to="/cars" className="mt-6">Back to cars</Button>
       </section>
@@ -53,6 +54,8 @@ export default function CarDetails() {
   }
 
   const vehicleName = `${vehicle.brand} ${vehicle.model}`;
+  const hostedListing = vehicle.source === 'firestore-listing';
+  const host = vehicle.ownerSnapshot || { displayName: 'Host information unavailable', photoURL: '', emailVerified: null };
   const continueToBooking = () => {
     if (!user) {
       navigate('/login', { state: { from: location } });
@@ -116,6 +119,13 @@ export default function CarDetails() {
             <Spec label="Fuel" value={vehicle.fuelType} />
           </dl>
 
+          {vehicle.description && (
+            <section className="mt-8" aria-labelledby="listing-description-title">
+              <h2 id="listing-description-title" className="font-heading text-lg font-semibold">About this car</h2>
+              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{vehicle.description}</p>
+            </section>
+          )}
+
           <section className="mt-8 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5" aria-labelledby="pickup-title">
             <h2 id="pickup-title" className="font-heading text-lg font-semibold">Pickup information</h2>
             <dl className="mt-4 space-y-3 text-sm">
@@ -125,12 +135,37 @@ export default function CarDetails() {
             </dl>
           </section>
 
+          <section className="mt-5 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5" aria-labelledby="host-title">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-tertiary)]">Listed by</p>
+            <div className="mt-3 flex items-center gap-3">
+              <Avatar src={host.photoURL} name={host.displayName} size="lg" />
+              <div>
+                <h2 id="host-title" className="font-heading text-lg font-semibold">{host.displayName || 'RideMint member'}</h2>
+                <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{vehicle.city}</p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-[var(--text-secondary)]">
+              {host.emailVerified === true
+                ? 'Firebase account email is verified.'
+                : host.emailVerified === false
+                  ? 'Firebase account email is not verified.'
+                  : 'Email-verification status is not available for this demo listing.'}
+            </p>
+          </section>
+
           <div className="mt-6">
-            <Button fullWidth size="lg" disabled={!vehicle.available} onClick={continueToBooking}>
-              {vehicle.available ? (user ? 'Continue to booking' : 'Sign in to continue') : 'Currently unavailable'}
+            <Button
+              fullWidth
+              size="lg"
+              disabled={!vehicle.available || hostedListing}
+              onClick={hostedListing ? undefined : continueToBooking}
+            >
+              {hostedListing ? 'Request this car' : vehicle.available ? (user ? 'Continue to booking' : 'Sign in to continue') : 'Currently unavailable'}
             </Button>
             <p className="mt-3 text-center text-sm text-[var(--text-secondary)]">
-              {vehicle.available
+              {hostedListing
+                ? 'Car requests are not available in this MVP phase.'
+                : vehicle.available
                 ? 'You can browse without an account. Sign-in is required only to continue to booking.'
                 : 'This demo vehicle cannot enter the booking flow while marked unavailable.'}
             </p>
@@ -141,10 +176,10 @@ export default function CarDetails() {
       <section className="mt-14 border-t border-[var(--border)] pt-10" aria-labelledby="policies-title">
         <h2 id="policies-title" className="font-heading text-2xl font-semibold">Rental details</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Policy title="Rental terms" text={vehicle.rentalTerms} />
-          <Policy title="Fuel policy" text={vehicle.fuelPolicy} />
-          <Policy title="Security deposit" text={vehicle.securityDeposit} />
-          <Policy title="Cancellation" text={vehicle.cancellationPolicy} />
+          <Policy title="Rental terms" text={vehicle.rentalTerms || 'Rental terms have not been collected for this host listing yet.'} />
+          <Policy title="Fuel policy" text={vehicle.fuelPolicy || 'Fuel terms will be defined in a later request-and-booking phase.'} />
+          <Policy title="Security deposit" text={vehicle.securityDeposit || 'Deposit information is not part of this listing MVP.'} />
+          <Policy title="Cancellation" text={vehicle.cancellationPolicy || 'Cancellation terms are not available until booking requests are implemented.'} />
         </div>
         <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]">
           Need help understanding a rental detail? RideMint support information will be presented before confirmation; no support number is supplied in this demo catalogue.

@@ -7,11 +7,14 @@ import {
   HiCalendarDays,
   HiChevronDown,
   HiCog6Tooth,
+  HiPlusCircle,
+  HiRectangleStack,
 } from 'react-icons/hi2';
 import { AuthContext } from '@/context/AuthContext';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Drawer from '@/components/ui/Drawer';
+import RideMintLogo from '@/components/brand/RideMintLogo';
 
 const customerLinks = [
   { label: 'Home', path: '/' },
@@ -52,10 +55,12 @@ export default function Navbar() {
         className="mx-auto flex h-16 max-w-[var(--content-customer)] items-center justify-between px-4 sm:px-6 lg:h-[4.5rem] lg:px-8"
       >
         <Link to="/" className="focus-ring inline-flex items-center gap-2 rounded-lg" aria-label="RideMint home">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-control)] bg-primary-500 text-xs font-bold text-white">
-            RM
+          <span className="hidden md:block">
+            <RideMintLogo variant="default" onDark />
           </span>
-          <span className="font-heading text-xl font-semibold tracking-tight">RideMint</span>
+          <span className="md:hidden">
+            <RideMintLogo variant="compact" onDark />
+          </span>
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
@@ -74,6 +79,19 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          {user && (
+            <NavLink
+              to="/list-your-car"
+              className={({ isActive }) =>
+                clsx(
+                  'focus-ring rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium transition-colors',
+                  isActive ? 'bg-white/10 text-white' : 'text-surface-300 hover:bg-white/5 hover:text-white'
+                )
+              }
+            >
+              List your car
+            </NavLink>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -106,6 +124,14 @@ export default function Navbar() {
                     label="My bookings"
                     onClick={() => {
                       navigate('/my-bookings');
+                      setAccountOpen(false);
+                    }}
+                  />
+                  <AccountAction
+                    icon={HiRectangleStack}
+                    label="My listings"
+                    onClick={() => {
+                      navigate('/my-listings');
                       setAccountOpen(false);
                     }}
                   />
@@ -164,12 +190,32 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          {user && (
+            <NavLink
+              to="/list-your-car"
+              onClick={closeMobile}
+              className={({ isActive }) =>
+                clsx(
+                  'focus-ring block rounded-[var(--radius-control)] px-4 py-3 text-sm font-medium',
+                  isActive ? 'bg-[var(--primary-subtle)] text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                )
+              }
+            >
+              List your car
+            </NavLink>
+          )}
         </nav>
         <div className="mt-6 border-t border-[var(--border)] pt-6">
           {user ? (
             <div className="space-y-2">
               <Button as={Link} to="/my-bookings" onClick={closeMobile} variant="secondary" fullWidth>
                 My bookings
+              </Button>
+              <Button as={Link} to="/my-listings" onClick={closeMobile} variant="secondary" fullWidth icon={HiRectangleStack}>
+                My listings
+              </Button>
+              <Button as={Link} to="/list-your-car" onClick={closeMobile} fullWidth icon={HiPlusCircle}>
+                List your car
               </Button>
               {isAdmin && (
                 <Button as={Link} to="/admin" onClick={closeMobile} variant="secondary" fullWidth>

@@ -3,18 +3,17 @@ import { getCatalogVehicleById, getCatalogVehicles } from '../services/catalogSe
 
 export function useCatalogVehicles() {
   return useQuery({
-    queryKey: ['demo-catalog-vehicles'],
+    queryKey: ['catalog-vehicles'],
     queryFn: getCatalogVehicles,
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useCatalogVehicle(vehicleId) {
   return useQuery({
-    queryKey: ['demo-catalog-vehicle', vehicleId],
+    queryKey: ['catalog-vehicle', vehicleId],
     queryFn: () => getCatalogVehicleById(vehicleId),
     enabled: Boolean(vehicleId),
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000,
   });
 }
-

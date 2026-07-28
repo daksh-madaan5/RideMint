@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
+    "test:listings": "node --test tests/listing-policy.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

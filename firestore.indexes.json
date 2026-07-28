@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "vehicleListings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "listingStatus", "order": "ASCENDING" },
+        { "fieldPath": "availabilityStatus", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

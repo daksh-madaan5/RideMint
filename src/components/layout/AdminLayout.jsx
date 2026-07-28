@@ -1,33 +1,35 @@
 import { useState } from 'react';
-import { Outlet, NavLink, Link, useNavigate } from 'react-router';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { clsx } from 'clsx';
-import { motion } from 'motion/react';
 import {
+  HiArrowLeftOnRectangle,
+  HiBars3,
+  HiCalendarDays,
+  HiChartBar,
+  HiClipboardDocumentCheck,
   HiHome,
   HiTruck,
-  HiCalendarDays,
   HiUsers,
-  HiBars3,
   HiXMark,
-  HiArrowLeftOnRectangle,
-  HiChartBar,
 } from 'react-icons/hi2';
+import RideMintLogo from '@/components/brand/RideMintLogo';
+import Avatar from '@/components/ui/Avatar';
+import IconButton from '@/components/ui/IconButton';
 import { useAuth } from '@/hooks/useAuth';
 
 const sidebarLinks = [
   { label: 'Dashboard', path: '/admin', icon: HiChartBar, end: true },
-  { label: 'Manage Cars', path: '/admin/cars', icon: HiTruck },
+  { label: 'Manage cars', path: '/admin/cars', icon: HiTruck },
+  { label: 'Listing moderation', path: '/admin/listings', icon: HiClipboardDocumentCheck },
   { label: 'Bookings', path: '/admin/bookings', icon: HiCalendarDays },
   { label: 'Users', path: '/admin/users', icon: HiUsers },
 ];
 
-/**
- * Admin layout with sidebar navigation and top bar.
- */
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, userProfile, logout } = useAuth();
   const navigate = useNavigate();
+  const adminName = user?.displayName || userProfile?.name || 'Administrator';
 
   const handleLogout = async () => {
     await logout();
@@ -35,43 +37,33 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-950 flex">
-      {/* Mobile Sidebar Overlay */}
+    <div className="flex min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        <button
+          type="button"
+          aria-label="Close admin navigation"
+          className="fixed inset-0 z-40 bg-[color-mix(in_srgb,var(--navigation)_38%,transparent)] lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-surface-900/95 backdrop-blur-xl',
-          'border-r border-surface-800/50 flex flex-col transition-transform duration-300 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] transition-transform duration-[var(--duration-normal)] lg:sticky lg:top-0 lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between px-6 h-16 border-b border-surface-800/50">
-          <Link to="/admin" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">RM</span>
-            </div>
-            <span className="text-lg font-heading font-bold text-surface-100">
-              RideMint Admin
-            </span>
+        <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-4">
+          <Link to="/admin" className="focus-ring inline-flex items-center gap-3 rounded-[var(--radius-control)]">
+            <RideMintLogo variant="compact" />
+            <span className="font-heading text-sm font-semibold">Admin</span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-surface-400 hover:bg-surface-800"
-          >
-            <HiXMark className="h-5 w-5" />
-          </button>
+          <IconButton label="Close admin navigation" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+            <HiXMark className="h-5 w-5" aria-hidden="true" />
+          </IconButton>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav aria-label="Administrator navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {sidebarLinks.map((link) => (
             <NavLink
               key={link.path}
@@ -80,73 +72,64 @@ export default function AdminLayout() {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                  'focus-ring flex h-10 items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary-600/15 text-primary-400 shadow-sm'
-                    : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800/50'
+                    ? 'bg-[var(--primary-subtle)] text-[var(--primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]'
                 )
               }
             >
-              <link.icon className="h-5 w-5" />
+              <link.icon className="h-5 w-5 shrink-0" aria-hidden="true" />
               {link.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="px-3 py-4 border-t border-surface-800/50 space-y-2">
+        <div className="space-y-1 border-t border-[var(--border)] p-3">
           <Link
             to="/"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-surface-400 hover:text-surface-100 hover:bg-surface-800/50 transition-colors"
+            className="focus-ring flex h-10 items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]"
           >
-            <HiHome className="h-5 w-5" />
-            Back to Site
+            <HiHome className="h-5 w-5" aria-hidden="true" />
+            Back to site
           </Link>
           <button
+            type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-danger hover:bg-danger/10 transition-colors"
+            className="focus-ring flex h-10 w-full items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm text-[var(--danger)] hover:bg-[var(--danger-subtle)]"
           >
-            <HiArrowLeftOnRectangle className="h-5 w-5" />
-            Sign Out
+            <HiArrowLeftOnRectangle className="h-5 w-5" aria-hidden="true" />
+            Sign out
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 h-16 bg-surface-950/80 backdrop-blur-xl border-b border-surface-800/50 flex items-center justify-between px-4 lg:px-8">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-xl text-surface-400 hover:bg-surface-800/50"
-          >
-            <HiBars3 className="h-5 w-5" />
-          </button>
-
-          <div className="flex-1" />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4 lg:px-6">
+          <IconButton label="Open admin navigation" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+            <HiBars3 className="h-5 w-5" aria-hidden="true" />
+          </IconButton>
+          <div className="hidden lg:block">
+            <p className="text-sm font-medium">RideMint administration</p>
+          </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-surface-200">
-                {user?.displayName || userProfile?.name}
-              </p>
-              <p className="text-xs text-surface-500">Administrator</p>
+            <div className="hidden text-right sm:block">
+              <p className="text-sm font-medium">{adminName}</p>
+              <p className="text-xs text-[var(--text-tertiary)]">Administrator</p>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-primary-600/20 flex items-center justify-center text-primary-400 font-semibold text-sm">
-              {(user?.displayName || userProfile?.name || 'A').charAt(0).toUpperCase()}
-            </div>
+            <Avatar
+              src={user?.photoURL || userProfile?.photo}
+              name={adminName}
+              size="sm"
+            />
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[var(--content-admin)]">
             <Outlet />
-          </motion.div>
+          </div>
         </main>
       </div>
     </div>

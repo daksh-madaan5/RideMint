@@ -1,6 +1,8 @@
 export const BRANDS = ['BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Porsche', 'Toyota', 'Honda', 'Ford', 'Lamborghini', 'Ferrari', 'Range Rover', 'Volvo'];
-export const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'Hybrid'];
+export const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'CNG'];
 export const TRANSMISSION_TYPES = ['Automatic', 'Manual'];
+export const LISTING_CATEGORIES = ['Hatchback', 'Sedan', 'SUV', 'MUV'];
+export const LISTING_SEAT_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 export const SEAT_OPTIONS = [2, 4, 5, 6, 7, 8];
 export const SORT_OPTIONS = [
   { label: 'Price: Low to High', value: 'price-asc' },
