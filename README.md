@@ -40,8 +40,10 @@ emulator-certified Firestore Security Rules suite. The complete listing,
 booking-domain, callable, concurrency, and Rules suite passes locally.
 
 The secure `rentalBookings` callable backend and deterministic date-lock
-transactions are local-emulator-only. The Spark-plan public build defaults to
-an honest booking preview and never deploys Functions.
+transactions are local-emulator-only. The local-secure UI supports customer
+requests, My Bookings, host responses, and eligible cancellations against the
+Firebase Emulator Suite. The Spark-plan public build defaults to an honest
+booking preview and never deploys Functions.
 
 The latest polish phase adds inactive-listing reactivation, clearer status-based
 owner listing groups, supplied PNG branding, and a light Graphite Mint migration

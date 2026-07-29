@@ -10,6 +10,7 @@
     "test:listings": "node --test tests/listing-policy.test.js",
     "test:booking-domain": "npm --prefix functions test",
     "firebase:emulators": "firebase emulators:start --only auth,firestore,functions --project demo-ridemint",
+    "seed:emulator": "node scripts/seed-emulator.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-ridemint \"node --test tests/firestore.rules.test.js\"",
     "test:booking-backend": "firebase emulators:exec --only auth,firestore,functions --project demo-ridemint \"node --test tests/booking-functions.emulator.test.js\"",
     "test:emulators": "firebase emulators:exec --only auth,firestore,functions --project demo-ridemint \"node --test tests/firestore.rules.test.js tests/booking-functions.emulator.test.js\"",

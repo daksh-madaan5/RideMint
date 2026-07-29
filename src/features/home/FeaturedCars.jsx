@@ -15,7 +15,7 @@ export default function FeaturedCars() {
       <div className="mx-auto max-w-[var(--content-customer)] px-4 sm:px-6 lg:px-8">
         <SectionHeader
           title="Cars for everyday journeys"
-          description="A first look at approved host listings and demo cars across supported cities."
+          description="Compare practical cars from local hosts across supported cities."
           action={
             <Button as={Link} to="/cars" variant="outline" iconRight={HiArrowRight}>
               View all cars

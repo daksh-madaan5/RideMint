@@ -1,28 +1,24 @@
-import { DEMO_VEHICLES } from '../data/demoVehicles';
+import { FALLBACK_VEHICLES } from '../data/catalogVehicles';
 import {
   getApprovedPublicListingById,
   getApprovedPublicListings,
   listingToCatalogVehicle,
 } from '@/features/listings/listingService';
 
-/**
- * Phase 2 uses centralized demo data so the browsing flow is deterministic.
- * Existing Firestore read services remain untouched for the later integration phase.
- */
 export async function getCatalogVehicles() {
   try {
     const publicListings = (await getApprovedPublicListings()).map(listingToCatalogVehicle);
     const publicKeys = new Set(publicListings.map(vehicleKey));
-    const nonDuplicateDemos = DEMO_VEHICLES.filter((vehicle) => !publicKeys.has(vehicleKey(vehicle)));
-    return [...publicListings, ...nonDuplicateDemos];
+    const uniqueFallbacks = FALLBACK_VEHICLES.filter((vehicle) => !publicKeys.has(vehicleKey(vehicle)));
+    return [...publicListings, ...uniqueFallbacks];
   } catch {
-    return DEMO_VEHICLES;
+    return FALLBACK_VEHICLES;
   }
 }
 
 export async function getCatalogVehicleById(vehicleId) {
-  const demoVehicle = DEMO_VEHICLES.find((vehicle) => vehicle.id === vehicleId);
-  if (demoVehicle) return demoVehicle;
+  const fallbackVehicle = FALLBACK_VEHICLES.find((vehicle) => vehicle.id === vehicleId);
+  if (fallbackVehicle) return fallbackVehicle;
   try {
     const listing = await getApprovedPublicListingById(vehicleId);
     return listing ? listingToCatalogVehicle(listing) : null;

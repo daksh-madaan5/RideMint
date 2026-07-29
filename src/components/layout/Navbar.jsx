@@ -7,6 +7,7 @@ import {
   HiCalendarDays,
   HiChevronDown,
   HiCog6Tooth,
+  HiInboxStack,
   HiPlusCircle,
   HiRectangleStack,
 } from 'react-icons/hi2';
@@ -49,12 +50,12 @@ export default function Navbar() {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--navigation)] text-[var(--navigation-text)]">
+    <header className="sticky top-0 z-40 border-b border-[var(--dark-border)] bg-[var(--dark-surface)] text-[var(--dark-text-primary)]">
       <nav
         aria-label="Primary navigation"
         className="mx-auto flex h-16 max-w-[var(--content-customer)] items-center justify-between px-4 sm:px-6 lg:h-[4.5rem] lg:px-8"
       >
-        <Link to="/" className="focus-ring inline-flex items-center gap-2 rounded-lg" aria-label="RideMint home">
+        <Link to="/" className="focus-ring-dark inline-flex items-center gap-2 rounded-lg" aria-label="RideMint home">
           <span className="hidden md:block">
             <RideMintLogo variant="default" onDark />
           </span>
@@ -71,8 +72,8 @@ export default function Navbar() {
               end={link.path === '/'}
               className={({ isActive }) =>
                 clsx(
-                  'focus-ring rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium transition-colors',
-                  isActive ? 'bg-white/10 text-white' : 'text-surface-300 hover:bg-white/5 hover:text-white'
+                  'focus-ring-dark rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium transition-colors',
+                  isActive ? 'bg-white/10 text-[var(--dark-text-primary)]' : 'text-[var(--dark-text-secondary)] hover:bg-white/5 hover:text-[var(--dark-text-primary)]'
                 )
               }
             >
@@ -84,8 +85,8 @@ export default function Navbar() {
               to="/list-your-car"
               className={({ isActive }) =>
                 clsx(
-                  'focus-ring rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium transition-colors',
-                  isActive ? 'bg-white/10 text-white' : 'text-surface-300 hover:bg-white/5 hover:text-white'
+                  'focus-ring-dark rounded-[var(--radius-control)] px-4 py-2 text-sm font-medium transition-colors',
+                  isActive ? 'bg-white/10 text-[var(--dark-text-primary)]' : 'text-[var(--dark-text-secondary)] hover:bg-white/5 hover:text-[var(--dark-text-primary)]'
                 )
               }
             >
@@ -100,7 +101,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setAccountOpen((open) => !open)}
-                className="focus-ring flex items-center gap-2 rounded-[var(--radius-control)] p-1.5 hover:bg-white/5"
+                className="focus-ring-dark flex items-center gap-2 rounded-[var(--radius-control)] p-1.5 text-[var(--dark-text-primary)] hover:bg-white/5"
                 aria-expanded={accountOpen}
                 aria-haspopup="menu"
               >
@@ -124,6 +125,14 @@ export default function Navbar() {
                     label="My bookings"
                     onClick={() => {
                       navigate('/my-bookings');
+                      setAccountOpen(false);
+                    }}
+                  />
+                  <AccountAction
+                    icon={HiInboxStack}
+                    label="Booking requests"
+                    onClick={() => {
+                      navigate('/booking-requests');
                       setAccountOpen(false);
                     }}
                   />
@@ -152,10 +161,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
-              <Button as={Link} to="/login" variant="ghost" size="sm" className="text-surface-200 hover:bg-white/5 hover:text-white">
+              <Button as={Link} to="/login" variant="ghost" size="sm" className="focus-ring-dark text-[var(--dark-text-secondary)] hover:bg-white/5 hover:text-[var(--dark-text-primary)]">
                 Sign in
               </Button>
-              <Button as={Link} to="/register" size="sm" className="bg-primary-500 hover:bg-primary-400">
+              <Button as={Link} to="/register" size="sm" className="focus-ring-dark bg-[var(--dark-action)] text-[var(--dark-action-text)] hover:bg-[var(--dark-action-hover)]">
                 Create account
               </Button>
             </div>
@@ -163,7 +172,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="focus-ring rounded-[var(--radius-control)] p-2 text-surface-200 hover:bg-white/5 hover:text-white md:hidden"
+            className="focus-ring-dark rounded-[var(--radius-control)] p-2 text-[var(--dark-text-secondary)] hover:bg-white/5 hover:text-[var(--dark-text-primary)] md:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
           >
@@ -210,6 +219,9 @@ export default function Navbar() {
             <div className="space-y-2">
               <Button as={Link} to="/my-bookings" onClick={closeMobile} variant="secondary" fullWidth>
                 My bookings
+              </Button>
+              <Button as={Link} to="/booking-requests" onClick={closeMobile} variant="secondary" fullWidth icon={HiInboxStack}>
+                Booking requests
               </Button>
               <Button as={Link} to="/my-listings" onClick={closeMobile} variant="secondary" fullWidth icon={HiRectangleStack}>
                 My listings

@@ -1,164 +1,392 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { useMemo, useState } from 'react';
+import {
+  HiArrowPath,
+  HiCalendarDays,
+  HiShieldCheck,
+} from 'react-icons/hi2';
 import { useQuery } from '@tanstack/react-query';
-import { getAllBookings } from '@/firebase/bookings';
-import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import Input from '@/components/ui/Input';
-import Pagination from '@/components/ui/Pagination';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import EmptyState from '@/components/ui/EmptyState';
+import ErrorState from '@/components/ui/ErrorState';
+import Skeleton from '@/components/ui/Skeleton';
+import {
+  BOOKING_PREVIEW_MESSAGE,
+  isLocalSecureBooking,
+} from '@/features/bookings/bookingMode';
+import { bookingStatusVariant } from '@/features/bookings/bookingUi';
+import { useAuth } from '@/hooks/useAuth';
 import { formatPrice, formatDate } from '@/utils/helpers';
-import useDebounce from '@/hooks/useDebounce';
 
-const STATUS_TABS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'];
+const STATUS_FILTERS = [
+  { label: 'All', value: 'all' },
+  { label: 'Pending', value: 'pending' },
+  { label: 'Confirmed', value: 'confirmed' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Completed', value: 'completed' },
+];
+
+function bookingVehicle(booking) {
+  const snapshot = booking.listingSnapshot || {};
+  return {
+    image: snapshot.imageUrl || snapshot.image || snapshot.images?.[0] || '/images/cars/vehicle-placeholder.svg',
+    name: [snapshot.make || snapshot.brand, snapshot.model].filter(Boolean).join(' ') || 'Vehicle unavailable',
+    year: snapshot.year,
+  };
+}
+
+function bookingPricing(booking) {
+  const snapshot = booking.pricingSnapshot || {};
+  return {
+    dailyPrice: snapshot.pricePerDay ?? booking.pricePerDay ?? 0,
+    rentalDays: snapshot.rentalDays ?? booking.rentalDays ?? 0,
+    total: snapshot.totalAmount ?? booking.totalAmount ?? 0,
+  };
+}
+
+function timestampLabel(value) {
+  return value ? formatDate(value) : 'Not recorded';
+}
+
+function lifecycleTimestamp(booking) {
+  const fields = {
+    confirmed: ['Confirmed', booking.confirmedAt],
+    rejected: ['Rejected', booking.rejectedAt],
+    cancelled: ['Cancelled', booking.cancelledAt],
+  };
+  return fields[booking.status];
+}
 
 export default function ManageBookings() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 500);
-  const [activeTab, setActiveTab] = useState('All');
-  const [page, setPage] = useState(1);
-  
-  const itemsPerPage = 10;
+  const { user, userProfile, isAdmin } = useAuth();
+  const [activeFilter, setActiveFilter] = useState('all');
+  const adminConfirmed = Boolean(user?.uid && isAdmin && userProfile?.role === 'admin');
 
-  const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ['admin-bookings'],
-    queryFn: getAllBookings,
+  const bookingsQuery = useQuery({
+    queryKey: ['rental-bookings', 'admin'],
+    queryFn: async () => {
+      if (!import.meta.env.DEV || !isLocalSecureBooking || !adminConfirmed) {
+        throw new Error('The secure admin booking overview is available only to a local administrator.');
+      }
+      const { getAdminRentalBookings } = await import(
+        '@/features/bookings/bookingQueries'
+      );
+      return getAdminRentalBookings({ isAdmin: adminConfirmed });
+    },
+    enabled: Boolean(isLocalSecureBooking && adminConfirmed),
   });
 
-  const filteredBookings = bookings.filter(booking => {
-    const searchStr = `${booking.customerName || ''} ${booking.carSnapshot?.brand || ''} ${booking.carSnapshot?.model || ''}`.toLowerCase();
-    const matchesSearch = searchStr.includes(debouncedSearch.toLowerCase());
-    const matchesTab = activeTab === 'All' ? true : booking.status.toLowerCase() === activeTab.toLowerCase();
-    return matchesSearch && matchesTab;
-  });
+  const bookings = useMemo(() => bookingsQuery.data || [], [bookingsQuery.data]);
+  const filteredBookings = useMemo(
+    () => activeFilter === 'all'
+      ? bookings
+      : bookings.filter((booking) => booking.status === activeFilter),
+    [activeFilter, bookings]
+  );
 
-  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
-  const paginatedBookings = filteredBookings.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  if (!isLocalSecureBooking) {
+    return (
+      <AdminBookingsShell>
+        <Card>
+          <EmptyState
+            icon={HiShieldCheck}
+            title="Secure booking administration is local-only"
+            description={BOOKING_PREVIEW_MESSAGE}
+          />
+        </Card>
+      </AdminBookingsShell>
+    );
+  }
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'completed': return 'success';
-      case 'confirmed': return 'primary';
-      case 'pending': return 'warning';
-      case 'cancelled': return 'danger';
-      default: return 'default';
-    }
-  };
+  if (!adminConfirmed) {
+    return (
+      <AdminBookingsShell>
+        <Card>
+          <EmptyState
+            icon={HiShieldCheck}
+            title="Administrator profile required"
+            description="Booking records are queried only after the signed-in profile confirms administrator access."
+          />
+        </Card>
+      </AdminBookingsShell>
+    );
+  }
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Manage Bookings</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Legacy booking records are read-only in the portfolio demo.
-        </p>
-      </div>
-
-      <Card className="p-6">
-        <div className="flex flex-col gap-6 mb-6">
-          <div className="flex gap-2 overflow-x-auto pb-2 border-b border-gray-100 dark:border-gray-800 hide-scrollbar">
-            {STATUS_TABS.map((tab) => (
+    <AdminBookingsShell
+      count={bookings.length}
+      refreshing={bookingsQuery.isFetching}
+      onRefresh={() => bookingsQuery.refetch()}
+    >
+      <Card padding={false}>
+        <div className="border-b border-[var(--border)] px-4 py-4 sm:px-5">
+          <div className="hide-scrollbar flex gap-2 overflow-x-auto" aria-label="Filter bookings by status">
+            {STATUS_FILTERS.map((filter) => (
               <button
-                key={tab}
-                onClick={() => { setActiveTab(tab); setPage(1); }}
-                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab 
-                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                key={filter.value}
+                type="button"
+                aria-pressed={activeFilter === filter.value}
+                onClick={() => setActiveFilter(filter.value)}
+                className={`focus-ring min-h-9 shrink-0 rounded-[var(--radius-pill)] px-3 text-sm font-medium transition-colors ${
+                  activeFilter === filter.value
+                    ? 'bg-[var(--primary)] text-white'
+                    : 'bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                {tab}
+                {filter.label}
               </button>
             ))}
           </div>
-
-          <div className="relative max-w-md w-full">
-            <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input 
-              placeholder="Search customer or car..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
-            ))}
-          </div>
+        {bookingsQuery.isLoading ? (
+          <BookingLoadingState />
+        ) : bookingsQuery.isError ? (
+          <ErrorState
+            title="Booking records could not be loaded"
+            description={bookingsQuery.error?.message || 'Check that the local Firebase emulators are running, then try again.'}
+            onRetry={bookingsQuery.refetch}
+          />
         ) : filteredBookings.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">No bookings found</h3>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">
-              There are no bookings matching your current filters.
-            </p>
-          </div>
+          <EmptyState
+            icon={HiCalendarDays}
+            title={bookings.length ? `No ${activeFilter} bookings` : 'No secure booking records'}
+            description={bookings.length
+              ? 'Choose another status filter to review the remaining records.'
+              : 'Secure rental requests will appear here after customers submit them in the local environment.'}
+            action={bookings.length && activeFilter !== 'all'
+              ? <Button variant="outline" onClick={() => setActiveFilter('all')}>Show all bookings</Button>
+              : undefined}
+          />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
-                <tr>
-                  <th className="px-6 py-4 font-medium">Customer</th>
-                  <th className="px-6 py-4 font-medium">Car</th>
-                  <th className="px-6 py-4 font-medium">Dates</th>
-                  <th className="px-6 py-4 font-medium">Total</th>
-                  <th className="px-6 py-4 font-medium">Status</th>
-                  <th className="px-6 py-4 font-medium">Access</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {paginatedBookings.map((booking, idx) => (
-                  <motion.tr 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    key={booking.id} 
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900 dark:text-white">{booking.customerName}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{booking.customerEmail}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900 dark:text-white">{booking.carSnapshot?.brand} {booking.carSnapshot?.model}</div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                      <div>{formatDate(booking.startDate)}</div>
-                      <div className="text-xs text-gray-400">to {formatDate(booking.endDate)}</div>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                      {formatPrice(booking.totalPrice)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant={getStatusColor(booking.status)}>
-                        {booking.status}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Read-only legacy record
-                      </span>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full table-fixed text-left text-sm">
+                <caption className="sr-only">
+                  Read-only secure rental booking records
+                </caption>
+                <thead className="bg-[var(--surface-subtle)] text-xs uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
+                  <tr>
+                    <th className="w-[21%] px-5 py-3 font-semibold">Vehicle</th>
+                    <th className="w-[20%] px-5 py-3 font-semibold">Participants</th>
+                    <th className="w-[17%] px-5 py-3 font-semibold">Dates</th>
+                    <th className="w-[14%] px-5 py-3 font-semibold">Pricing</th>
+                    <th className="w-[11%] px-5 py-3 font-semibold">Status</th>
+                    <th className="w-[17%] px-5 py-3 font-semibold">Reference</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {filteredBookings.map((booking) => (
+                    <BookingTableRow key={booking.id} booking={booking} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-        {totalPages > 1 && (
-          <div className="mt-6">
-            <Pagination 
-              currentPage={page} 
-              totalPages={totalPages} 
-              onPageChange={setPage} 
-            />
-          </div>
+            <div className="divide-y divide-[var(--border)] lg:hidden">
+              {filteredBookings.map((booking) => (
+                <BookingMobileCard key={booking.id} booking={booking} />
+              ))}
+            </div>
+          </>
         )}
       </Card>
+    </AdminBookingsShell>
+  );
+}
+
+function AdminBookingsShell({ children, count, refreshing, onRefresh }) {
+  return (
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+              Administration
+            </p>
+            <Badge variant="default">Read-only</Badge>
+          </div>
+          <h1 className="font-heading text-2xl font-semibold text-[var(--text-primary)] sm:text-3xl">
+            Booking overview
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
+            Review secure rental activity across customers and hosts without changing booking state.
+          </p>
+          {typeof count === 'number' && (
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]" aria-live="polite">
+              {count} {count === 1 ? 'booking record' : 'booking records'} loaded
+            </p>
+          )}
+        </div>
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="sm"
+            icon={HiArrowPath}
+            loading={refreshing}
+            loadingLabel="Refreshing"
+            onClick={onRefresh}
+          >
+            Refresh
+          </Button>
+        )}
+      </header>
+      {children}
+    </div>
+  );
+}
+
+function BookingLoadingState() {
+  return (
+    <div aria-label="Loading booking records" role="status">
+      <span className="sr-only">Loading booking records</span>
+      <div className="hidden divide-y divide-[var(--border)] lg:block">
+        {[1, 2, 3, 4].map((row) => (
+          <div key={row} className="grid grid-cols-6 gap-5 px-5 py-5">
+            {[1, 2, 3, 4, 5, 6].map((cell) => (
+              <Skeleton key={cell} className="h-4 w-full" />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="space-y-5 p-4 lg:hidden">
+        {[1, 2, 3].map((card) => (
+          <div key={card} className="space-y-3">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-3/5" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BookingTableRow({ booking }) {
+  const vehicle = bookingVehicle(booking);
+  const pricing = bookingPricing(booking);
+  const lifecycle = lifecycleTimestamp(booking);
+
+  return (
+    <tr className="align-top transition-colors hover:bg-[var(--surface-subtle)]">
+      <td className="px-5 py-5">
+        <VehicleIdentity vehicle={vehicle} />
+        <Identifier label="Listing ID" value={booking.listingId} className="mt-3" />
+      </td>
+      <td className="px-5 py-5">
+        <Identifier label="Customer UID" value={booking.customerId} />
+        <Identifier label="Host UID" value={booking.ownerId} className="mt-3" />
+      </td>
+      <td className="px-5 py-5 text-[var(--text-secondary)]">
+        <p className="font-medium text-[var(--text-primary)]">{formatDate(booking.pickupDate) || 'Date unavailable'}</p>
+        <p className="mt-1 text-xs">to {formatDate(booking.returnDate) || 'Date unavailable'}</p>
+        <p className="mt-2 text-xs">{pricing.rentalDays} {pricing.rentalDays === 1 ? 'day' : 'days'}</p>
+      </td>
+      <td className="px-5 py-5">
+        <p className="font-medium text-[var(--text-primary)]">{formatPrice(pricing.total)}</p>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          {formatPrice(pricing.dailyPrice)} / day
+        </p>
+      </td>
+      <td className="px-5 py-5">
+        <Badge variant={bookingStatusVariant(booking.status)} dot>
+          {booking.status || 'unknown'}
+        </Badge>
+      </td>
+      <td className="px-5 py-5">
+        <Identifier label="Booking ID" value={booking.id} />
+        <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+          Created {timestampLabel(booking.createdAt)}
+        </p>
+        <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+          Updated {timestampLabel(booking.updatedAt)}
+        </p>
+        {lifecycle && (
+          <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+            {lifecycle[0]} {timestampLabel(lifecycle[1])}
+          </p>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function BookingMobileCard({ booking }) {
+  const vehicle = bookingVehicle(booking);
+  const pricing = bookingPricing(booking);
+  const lifecycle = lifecycleTimestamp(booking);
+
+  return (
+    <article className="space-y-5 p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <VehicleIdentity vehicle={vehicle} />
+        <Badge variant={bookingStatusVariant(booking.status)} dot>
+          {booking.status || 'unknown'}
+        </Badge>
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+        <div>
+          <dt className="text-xs text-[var(--text-tertiary)]">Pickup</dt>
+          <dd className="mt-1 font-medium text-[var(--text-primary)]">{formatDate(booking.pickupDate) || 'Unavailable'}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-[var(--text-tertiary)]">Return</dt>
+          <dd className="mt-1 font-medium text-[var(--text-primary)]">{formatDate(booking.returnDate) || 'Unavailable'}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-[var(--text-tertiary)]">Duration</dt>
+          <dd className="mt-1 text-[var(--text-primary)]">{pricing.rentalDays} {pricing.rentalDays === 1 ? 'day' : 'days'}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-[var(--text-tertiary)]">Total</dt>
+          <dd className="mt-1 font-medium text-[var(--text-primary)]">{formatPrice(pricing.total)}</dd>
+          <dd className="mt-0.5 text-xs text-[var(--text-secondary)]">{formatPrice(pricing.dailyPrice)} / day</dd>
+        </div>
+      </dl>
+
+      <div className="grid gap-3 border-t border-[var(--border)] pt-4 sm:grid-cols-2">
+        <Identifier label="Customer UID" value={booking.customerId} />
+        <Identifier label="Host UID" value={booking.ownerId} />
+        <Identifier label="Booking ID" value={booking.id} />
+        <Identifier label="Listing ID" value={booking.listingId} />
+      </div>
+
+      <p className="text-xs text-[var(--text-tertiary)]">
+        Created {timestampLabel(booking.createdAt)} / Updated {timestampLabel(booking.updatedAt)}
+        {lifecycle && ` / ${lifecycle[0]} ${timestampLabel(lifecycle[1])}`}
+      </p>
+    </article>
+  );
+}
+
+function VehicleIdentity({ vehicle }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <img
+        src={vehicle.image}
+        alt=""
+        className="h-14 w-20 shrink-0 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] object-cover"
+      />
+      <div className="min-w-0">
+        <p className="font-medium text-[var(--text-primary)]">{vehicle.name}</p>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          {vehicle.year || 'Year unavailable'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Identifier({ label, value, className = '' }) {
+  return (
+    <div className={className}>
+      <p className="text-xs text-[var(--text-tertiary)]">{label}</p>
+      <p className="mt-1 break-all font-mono text-[11px] leading-4 text-[var(--text-secondary)]">
+        {value || 'Unavailable'}
+      </p>
     </div>
   );
 }

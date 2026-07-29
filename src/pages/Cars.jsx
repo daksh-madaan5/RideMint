@@ -102,7 +102,7 @@ export default function Cars() {
                 <h2 id="catalog-results" className="text-sm font-semibold text-[var(--text-primary)]">
                   {isLoading ? 'Loading vehicles…' : `${filteredVehicles.length} ${filteredVehicles.length === 1 ? 'vehicle' : 'vehicles'}`}
                 </h2>
-                <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">Approved marketplace listings and demo fallback cars</p>
+                <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">Cars available across supported cities</p>
               </div>
             </div>
             <Select
@@ -125,7 +125,7 @@ export default function Cars() {
             <ErrorState
               className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
               title="The car catalogue did not load"
-              description="Please retry the demo catalogue request."
+              description="Please try loading the available cars again."
               onRetry={refetch}
             />
           )}

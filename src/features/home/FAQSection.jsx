@@ -6,27 +6,23 @@ import { clsx } from 'clsx';
 const faqs = [
   {
     question: "How do I book a car?",
-    answer: "Booking a car is simple. Browse our fleet, select your desired dates, and proceed to checkout. You can complete the entire process online in just a few minutes."
+    answer: "Open an available listing, choose your rental dates, and sign in to send a booking request when online booking is available."
   },
   {
     question: "What documents do I need?",
-    answer: "You will need a valid driving licence and the booking documents specified during confirmation. Final eligibility requirements will be documented before launch."
+    answer: "A valid driving licence and identity verification are required at pickup. The host confirms any additional rental requirements before pickup."
   },
   {
     question: "Can I cancel my booking?",
-    answer: "Yes, you can cancel your booking for a full refund up to 48 hours before your scheduled pickup time. Cancellations made within 48 hours may be subject to a fee."
+    answer: "Eligible pending or confirmed bookings may be cancelled before the pickup date. RideMint does not currently process payments or refunds."
   },
   {
-    question: "Is insurance included?",
-    answer: "Basic liability coverage is included with all rentals. We also offer comprehensive premium coverage options at checkout for complete peace of mind during your journey."
+    question: "How does the fuel policy work?",
+    answer: "Return the vehicle with the same fuel level recorded at pickup. Review the listing details before sending a request."
   },
   {
-    question: "What fuel policy do you follow?",
-    answer: "We operate on a full-to-full policy. The vehicle will be provided with a full tank of fuel, and it should be returned with a full tank to avoid refueling charges."
-  },
-  {
-    question: "Do you offer long-term rentals?",
-    answer: "Absolutely. We offer competitive rates for weekly and monthly rentals. Contact our corporate team for customized long-term leasing solutions."
+    question: "Where will I collect the car?",
+    answer: "The listing shows the city and available pickup area. The host shares the final pickup details after confirmation."
   }
 ];
 
@@ -34,11 +30,11 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="py-20 lg:py-32 bg-surface-900">
+    <section data-dark-surface className="bg-[var(--dark-surface)] py-20 lg:py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-white">Frequently Asked Questions</h2>
-          <p className="text-surface-400 text-lg mt-4">Common questions about renting with RideMint</p>
+          <h2 className="font-heading text-3xl font-bold text-[var(--dark-text-primary)] lg:text-4xl">Frequently asked questions</h2>
+          <p className="mt-4 text-lg text-[var(--dark-text-secondary)]">Common questions about renting with RideMint</p>
         </div>
 
         <div className="space-y-4">
@@ -53,19 +49,21 @@ export default function FAQSection() {
                 transition={{ duration: 0.4, delay: index * 0.05 }}
                 className={clsx(
                   "border rounded-2xl overflow-hidden transition-colors duration-300",
-                  isOpen ? "bg-surface-800 border-surface-700" : "bg-surface-950 border-surface-800 hover:border-surface-700"
+                  isOpen
+                    ? "border-[var(--dark-border)] bg-[var(--dark-surface-elevated)]"
+                    : "border-[var(--dark-border)] bg-[var(--dark-surface)] hover:bg-[var(--dark-surface-elevated)]"
                 )}
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+                  className="focus-ring-dark flex w-full items-center justify-between p-6 text-left"
                 >
-                  <span className="text-lg font-medium text-white">{faq.question}</span>
+                  <span className="text-lg font-medium text-[var(--dark-text-primary)]">{faq.question}</span>
                   <div className="ml-4 flex-shrink-0">
                     {isOpen ? (
                       <HiMinus className="w-6 h-6 text-primary-400" />
                     ) : (
-                      <HiPlus className="w-6 h-6 text-surface-400" />
+                      <HiPlus className="h-6 w-6 text-[var(--dark-text-secondary)]" />
                     )}
                   </div>
                 </button>
@@ -77,7 +75,7 @@ export default function FAQSection() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                      <div className="px-6 pb-6 text-surface-400">
+                      <div className="px-6 pb-6 text-[var(--dark-text-secondary)]">
                         {faq.answer}
                       </div>
                     </motion.div>

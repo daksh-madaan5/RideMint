@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import {
   HiArrowLeft,
   HiCalendarDays,
@@ -14,14 +14,11 @@ import ErrorState from '@/components/ui/ErrorState';
 import Skeleton from '@/components/ui/Skeleton';
 import VehicleImage from '@/features/cars/VehicleImage';
 import { useCatalogVehicle } from '@/features/cars/hooks/useCatalogVehicles';
-import { useAuth } from '@/hooks/useAuth';
+import SecureBookingPanel from '@/features/bookings/SecureBookingPanel';
 import { formatPrice } from '@/utils/helpers';
 
 export default function CarDetails() {
   const { carId } = useParams();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { data: vehicle, isLoading, isError, refetch } = useCatalogVehicle(carId);
 
   if (isLoading) {
@@ -43,7 +40,7 @@ export default function CarDetails() {
   if (!vehicle) {
     return (
       <section className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-4 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Catalogue fallback</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Vehicle search</p>
         <h1 className="mt-3 font-heading text-3xl font-semibold">Vehicle not found</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
           This catalogue entry does not exist. Return to Explore cars to choose another listing.
@@ -54,15 +51,7 @@ export default function CarDetails() {
   }
 
   const vehicleName = `${vehicle.brand} ${vehicle.model}`;
-  const hostedListing = vehicle.source === 'firestore-listing';
   const host = vehicle.ownerSnapshot || { displayName: 'Host information unavailable', photoURL: '', emailVerified: null };
-  const continueToBooking = () => {
-    if (!user) {
-      navigate('/login', { state: { from: location } });
-      return;
-    }
-    navigate(`/booking/${vehicle.id}`);
-  };
 
   return (
     <div className="mx-auto max-w-[var(--content-customer)] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
@@ -109,7 +98,7 @@ export default function CarDetails() {
               {formatPrice(vehicle.pricePerDay)}
               <span className="ml-2 font-body text-sm font-normal text-[var(--text-secondary)]">per day</span>
             </p>
-            <p className="mt-2 text-xs text-[var(--text-tertiary)]">Demo rate. Final totals are calculated in the booking flow.</p>
+            <p className="mt-2 text-xs text-[var(--text-tertiary)]">Estimated daily price. The total is calculated from your selected dates.</p>
           </div>
 
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -130,8 +119,10 @@ export default function CarDetails() {
             <h2 id="pickup-title" className="font-heading text-lg font-semibold">Pickup information</h2>
             <dl className="mt-4 space-y-3 text-sm">
               <DetailRow term="City" detail={vehicle.branch.city} />
-              <DetailRow term="Address" detail={vehicle.branch.address || 'Demo information not supplied'} />
-              <DetailRow term="Operating hours" detail={vehicle.branch.operatingHours || 'Demo information not supplied'} />
+              <DetailRow term="Pickup area" detail={vehicle.branch.address || 'Shared after confirmation.'} />
+              {vehicle.branch.operatingHours && (
+                <DetailRow term="Pickup hours" detail={vehicle.branch.operatingHours} />
+              )}
             </dl>
           </section>
 
@@ -144,46 +135,23 @@ export default function CarDetails() {
                 <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{vehicle.city}</p>
               </div>
             </div>
-            <p className="mt-3 text-xs text-[var(--text-secondary)]">
-              {host.emailVerified === true
-                ? 'Firebase account email is verified.'
-                : host.emailVerified === false
-                  ? 'Firebase account email is not verified.'
-                  : 'Email-verification status is not available for this demo listing.'}
-            </p>
+            {host.emailVerified === true && (
+              <p className="mt-3 text-xs text-[var(--text-secondary)]">Verified email account</p>
+            )}
           </section>
 
-          <div className="mt-6">
-            <Button
-              fullWidth
-              size="lg"
-              disabled={!vehicle.available || hostedListing}
-              onClick={hostedListing ? undefined : continueToBooking}
-            >
-              {hostedListing ? 'Request this car' : vehicle.available ? (user ? 'Continue to booking' : 'Sign in to continue') : 'Currently unavailable'}
-            </Button>
-            <p className="mt-3 text-center text-sm text-[var(--text-secondary)]">
-              {hostedListing
-                ? 'Online booking is not enabled in this portfolio demo.'
-                : vehicle.available
-                ? 'You can browse without an account. Sign-in is required only to continue to booking.'
-                : 'This demo vehicle cannot enter the booking flow while marked unavailable.'}
-            </p>
-          </div>
+          <SecureBookingPanel vehicle={vehicle} />
         </div>
       </div>
 
       <section className="mt-14 border-t border-[var(--border)] pt-10" aria-labelledby="policies-title">
         <h2 id="policies-title" className="font-heading text-2xl font-semibold">Rental details</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Policy title="Rental terms" text={vehicle.rentalTerms || 'Rental terms have not been collected for this host listing yet.'} />
-          <Policy title="Fuel policy" text={vehicle.fuelPolicy || 'Fuel terms will be defined in a later request-and-booking phase.'} />
-          <Policy title="Security deposit" text={vehicle.securityDeposit || 'Deposit information is not part of this listing MVP.'} />
-          <Policy title="Cancellation" text={vehicle.cancellationPolicy || 'Cancellation terms are not available until booking requests are implemented.'} />
+          <Policy title="Rental terms" text={vehicle.rentalTerms || 'A valid driving licence and identity verification are required at pickup.'} />
+          <Policy title="Fuel policy" text={vehicle.fuelPolicy || 'Return the vehicle with the same fuel level recorded at pickup.'} />
+          <Policy title="Security deposit" text={vehicle.securityDeposit || 'A refundable security deposit may be confirmed by the host before pickup.'} />
+          <Policy title="Cancellation" text={vehicle.cancellationPolicy || 'Eligible bookings may be cancelled before the pickup date.'} />
         </div>
-        <p className="mt-6 text-sm leading-6 text-[var(--text-secondary)]">
-          Need help understanding a rental detail? RideMint support information will be presented before confirmation; no support number is supplied in this demo catalogue.
-        </p>
       </section>
     </div>
   );

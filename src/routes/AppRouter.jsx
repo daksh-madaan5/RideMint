@@ -23,6 +23,7 @@ const DesignSystem = lazy(() => import('@/pages/DesignSystem'));
 // Protected pages
 const Booking = lazy(() => import('@/pages/Booking'));
 const BookingHistory = lazy(() => import('@/pages/BookingHistory'));
+const BookingRequests = lazy(() => import('@/pages/BookingRequests'));
 const Favorites = lazy(() => import('@/pages/Favorites'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const ListYourCar = lazy(() => import('@/pages/ListYourCar'));
@@ -30,8 +31,6 @@ const MyListings = lazy(() => import('@/pages/MyListings'));
 
 // Admin pages
 const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
-const ManageCars = lazy(() => import('@/pages/admin/ManageCars'));
-const CarForm = lazy(() => import('@/pages/admin/CarForm'));
 const ManageBookings = lazy(() => import('@/pages/admin/ManageBookings'));
 const ManageUsers = lazy(() => import('@/pages/admin/ManageUsers'));
 const ModerateListings = lazy(() => import('@/pages/admin/ModerateListings'));
@@ -70,14 +69,7 @@ export default function AppRouter() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected User Routes */}
-          <Route
-            path="/booking/:carId"
-            element={
-              <ProtectedRoute>
-                <Booking />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/booking/:carId" element={<Booking />} />
           <Route
             path="/my-bookings"
             element={
@@ -87,6 +79,14 @@ export default function AppRouter() {
             }
           />
           <Route path="/bookings" element={<Navigate to="/my-bookings" replace />} />
+          <Route
+            path="/booking-requests"
+            element={
+              <ProtectedRoute>
+                <BookingRequests />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/list-your-car"
             element={
@@ -141,9 +141,9 @@ export default function AppRouter() {
           }
         >
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/cars" element={<ManageCars />} />
-          <Route path="/admin/cars/new" element={<CarForm />} />
-          <Route path="/admin/cars/edit/:id" element={<CarForm />} />
+          <Route path="/admin/cars" element={<Navigate to="/admin/listings" replace />} />
+          <Route path="/admin/cars/new" element={<Navigate to="/admin/listings" replace />} />
+          <Route path="/admin/cars/edit/:id" element={<Navigate to="/admin/listings" replace />} />
           <Route path="/admin/bookings" element={<ManageBookings />} />
           <Route path="/admin/users" element={<ManageUsers />} />
           <Route path="/admin/listings" element={<ModerateListings />} />

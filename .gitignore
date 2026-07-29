@@ -32,3 +32,5 @@ firebase-adminsdk-*.json
 *.njsproj
 *.sln
 *.sw?
+
+AGENTS.md

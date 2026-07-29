@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { clsx } from 'clsx';
-import { VEHICLE_PLACEHOLDER_IMAGE } from './data/demoVehicles';
+import { VEHICLE_PLACEHOLDER_IMAGE } from './data/catalogVehicles';
 
 export default function VehicleImage({
   src,
@@ -29,4 +29,3 @@ export default function VehicleImage({
     </div>
   );
 }
-

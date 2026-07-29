@@ -21,7 +21,7 @@ export default function About() {
       <section className="mx-auto max-w-[var(--content-customer)] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="grid gap-5 md:grid-cols-3">
           <Value icon={HiUsers} title="Local hosts" text="Authenticated members can submit a car listing for administrator review." />
-          <Value icon={HiCheckBadge} title="Moderated listings" text="Only approved and available host listings appear alongside the clearly labelled demo fallback." />
+          <Value icon={HiCheckBadge} title="Moderated listings" text="Host listings are reviewed before they appear in the public marketplace." />
           <Value icon={HiMapPin} title="Built around cities" text="Browse by pickup city first, then narrow the marketplace to a suitable vehicle." />
         </div>
       </section>
@@ -31,7 +31,7 @@ export default function About() {
           <div>
             <h2 className="font-heading text-3xl font-semibold tracking-tight">Supported cities</h2>
             <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-              Host listings currently use these seven city options. Demo cars remain available when no approved Firestore listings exist.
+              Browse listings across seven supported cities, then review the pickup area shared for each car.
             </p>
           </div>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -48,15 +48,15 @@ export default function About() {
         <div>
           <h2 className="font-heading text-2xl font-semibold">How a rental works</h2>
           <ol className="mt-5 space-y-4 text-sm leading-6 text-[var(--text-secondary)]">
-            <li><strong className="text-[var(--text-primary)]">1. Browse:</strong> choose a city and compare approved host listings and demo cars.</li>
+            <li><strong className="text-[var(--text-primary)]">1. Browse:</strong> choose a city and compare available cars from local hosts.</li>
             <li><strong className="text-[var(--text-primary)]">2. Review:</strong> check vehicle details, availability, and the minimal public host profile.</li>
-            <li><strong className="text-[var(--text-primary)]">3. Request later:</strong> booking requests and secure contact exchange are outside this MVP phase.</li>
+            <li><strong className="text-[var(--text-primary)]">3. Request:</strong> choose rental dates and send a booking request when online booking is available.</li>
           </ol>
         </div>
         <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="font-heading text-2xl font-semibold">Customer support</h2>
+          <h2 className="font-heading text-2xl font-semibold">Before pickup</h2>
           <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-            RideMint support is intended to help with marketplace and listing questions. This MVP does not invent a phone number, email address, or support hours.
+            The host confirms pickup details, rental requirements, and any refundable security deposit before the rental begins.
           </p>
         </div>
       </section>

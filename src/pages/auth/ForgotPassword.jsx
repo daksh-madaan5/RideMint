@@ -40,21 +40,21 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center bg-[var(--background)] px-4 py-12 sm:px-6 lg:px-8">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="sm:mx-auto sm:w-full sm:max-w-md"
       >
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl sm:rounded-3xl sm:px-10 border border-gray-100 dark:border-gray-700">
+        <div className="rounded-[var(--radius-panel)] border border-[var(--border)] bg-[var(--surface)] px-4 py-8 shadow-[var(--shadow-card)] sm:px-10">
           
           {isSent ? (
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30">
-                <HiOutlineCheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--success-subtle)]">
+                <HiOutlineCheckCircle className="h-6 w-6 text-[var(--success)]" />
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Check your email</h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <h2 className="mt-4 text-2xl font-bold text-[var(--text-primary)]">Check your email</h2>
+              <p className="mb-6 mt-2 text-sm text-[var(--text-secondary)]">
                 We've sent password reset instructions to your email address.
               </p>
               <Button as={Link} to="/login" className="w-full flex justify-center">
@@ -64,8 +64,8 @@ export default function ForgotPassword() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Reset Password</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
+                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Reset password</h2>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
                   Enter your email address and we'll send you a link to reset your password.
                 </p>
               </div>
@@ -88,9 +88,9 @@ export default function ForgotPassword() {
 
           {!isSent && (
             <div className="mt-6 flex items-center justify-center">
-              <Link to="/login" className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+              <Link to="/login" className="focus-ring flex items-center rounded text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">
                 <HiOutlineArrowLeft className="h-4 w-4 mr-2" />
-                Back to Login
+                Back to sign in
               </Link>
             </div>
           )}

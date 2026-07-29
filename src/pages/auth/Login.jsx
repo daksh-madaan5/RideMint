@@ -59,15 +59,14 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-50 dark:bg-surface-950">
+    <div className="flex min-h-screen bg-[var(--background)]">
       {/* Left Branding Panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-surface-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-surface-900 via-surface-950 to-black opacity-90" />
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white max-w-xl">
+      <div data-dark-surface className="relative hidden overflow-hidden bg-[var(--dark-surface)] lg:flex lg:w-1/2">
+        <div className="relative z-10 flex max-w-xl flex-col justify-center px-16">
           <motion.h1 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl lg:text-5xl font-heading font-bold mb-4 tracking-tight leading-tight"
+            className="mb-4 font-heading text-4xl font-bold leading-tight tracking-tight text-[var(--dark-text-primary)] lg:text-5xl"
           >
             Welcome back to RideMint
           </motion.h1>
@@ -75,9 +74,9 @@ export default function Login() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg text-surface-400 leading-relaxed"
+            className="text-lg leading-relaxed text-[var(--dark-text-secondary)]"
           >
-            Access your premium fleet account and get behind the wheel of world-class supercars.
+            Manage your listings, booking requests, and upcoming rentals in one place.
           </motion.p>
         </div>
       </div>
@@ -87,11 +86,11 @@ export default function Login() {
         <motion.div 
           initial={{ opacity: 0, x: 15 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mx-auto w-full max-w-sm lg:max-w-md bg-white dark:bg-surface-900 rounded-3xl shadow-card p-8 border border-surface-200 dark:border-surface-800"
+          className="mx-auto w-full max-w-sm rounded-[var(--radius-panel)] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow-card)] lg:max-w-md"
         >
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-surface-900 dark:text-surface-50 tracking-tight">Sign In</h2>
-            <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">Please enter your credentials below.</p>
+            <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">Sign in</h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Enter your account details to continue.</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -112,8 +111,8 @@ export default function Login() {
                 {...register('password')}
               />
               <div className="flex justify-end pt-1">
-                <Link to="/forgot-password" className="text-xs font-medium text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100 transition-colors">
-                  Forgot Password?
+                <Link to="/forgot-password" className="focus-ring rounded text-xs font-semibold text-[var(--primary)] underline-offset-4 transition-colors hover:text-[var(--primary-hover)] hover:underline">
+                  Forgot password?
                 </Link>
               </div>
             </div>
@@ -126,10 +125,10 @@ export default function Login() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-surface-200 dark:border-surface-800" />
+                <div className="w-full border-t border-[var(--border)]" />
               </div>
               <div className="relative flex justify-center text-xs uppercase tracking-wider">
-                <span className="px-3 bg-white dark:bg-surface-900 text-surface-400">Or continue with</span>
+                <span className="bg-[var(--surface)] px-3 text-[var(--text-tertiary)]">Or continue with</span>
               </div>
             </div>
 
@@ -146,10 +145,10 @@ export default function Login() {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-xs sm:text-sm text-surface-500 dark:text-surface-400">
+          <p className="mt-8 text-center text-xs text-[var(--text-secondary)] sm:text-sm">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-surface-900 dark:text-surface-100 underline hover:opacity-80">
-              Create Account
+            <Link to="/register" className="focus-ring rounded font-semibold text-[var(--primary)] underline underline-offset-4 hover:text-[var(--primary-hover)]">
+              Create account
             </Link>
           </p>
         </motion.div>

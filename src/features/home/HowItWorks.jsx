@@ -14,8 +14,8 @@ const steps = [
   },
   {
     icon: HiKey,
-    title: 'Continue securely',
-    description: 'Sign in to continue when a future car-request flow is available.',
+    title: 'Send a request',
+    description: 'Choose rental dates, sign in, and send a booking request when online booking is available.',
   },
 ];
 

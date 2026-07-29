@@ -9,7 +9,7 @@ import {
 } from '@/constants';
 import {
   CATALOG_PRICE_RANGES,
-} from './data/demoVehicles';
+} from './data/catalogVehicles';
 
 export default function CarFilters({ filters, onChange, onClear, className = '' }) {
   return (

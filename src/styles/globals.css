@@ -54,6 +54,15 @@ h6 {
   letter-spacing: -0.025em;
 }
 
+[data-dark-surface] h1,
+[data-dark-surface] h2,
+[data-dark-surface] h3,
+[data-dark-surface] h4,
+[data-dark-surface] h5,
+[data-dark-surface] h6 {
+  color: var(--dark-text-primary);
+}
+
 p {
   margin: 0;
 }
@@ -67,6 +76,11 @@ p {
 .focus-ring:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--primary) 34%, transparent);
   outline-offset: 2px;
+}
+
+.focus-ring-dark:focus-visible {
+  outline: 3px solid var(--dark-link);
+  outline-offset: 3px;
 }
 
 .type-display {

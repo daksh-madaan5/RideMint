@@ -147,9 +147,11 @@ export function listingToCatalogVehicle(listing) {
     image: listing.images?.[0]?.url,
     available: listing.availabilityStatus === 'available',
     branch: {
-      name: `${listing.city} pickup arranged with the host`,
+      name: listing.pickupArea
+        ? `${listing.pickupArea}, ${listing.city}`
+        : `${listing.city} pickup arranged with the host`,
       city: listing.city,
-      address: null,
+      address: listing.pickupArea || null,
       operatingHours: null,
     },
     specifications: [

@@ -48,6 +48,16 @@
   --primary-subtle: #e6f0eb;
   --navigation: #171c1a;
   --navigation-text: #f3f5f4;
+  --dark-surface: #171c1a;
+  --dark-surface-elevated: #222a26;
+  --dark-text-primary: #f7faf8;
+  --dark-text-secondary: #c7d0cb;
+  --dark-text-tertiary: #a5b0aa;
+  --dark-border: #46504b;
+  --dark-link: #b8d8c8;
+  --dark-action: #a8c7b7;
+  --dark-action-hover: #cddfd5;
+  --dark-action-text: #102e26;
   --success: #347055;
   --success-subtle: #e7f1eb;
   --warning: #96692b;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { clsx } from 'clsx';
 import {
@@ -8,7 +8,6 @@ import {
   HiChartBar,
   HiClipboardDocumentCheck,
   HiHome,
-  HiTruck,
   HiUsers,
   HiXMark,
 } from 'react-icons/hi2';
@@ -19,17 +18,38 @@ import { useAuth } from '@/hooks/useAuth';
 
 const sidebarLinks = [
   { label: 'Dashboard', path: '/admin', icon: HiChartBar, end: true },
-  { label: 'Manage cars', path: '/admin/cars', icon: HiTruck },
-  { label: 'Listing moderation', path: '/admin/listings', icon: HiClipboardDocumentCheck },
+  { label: 'Manage listings', path: '/admin/listings', icon: HiClipboardDocumentCheck },
   { label: 'Bookings', path: '/admin/bookings', icon: HiCalendarDays },
   { label: 'Users', path: '/admin/users', icon: HiUsers },
 ];
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const openSidebarButtonRef = useRef(null);
+  const closeSidebarButtonRef = useRef(null);
   const { user, userProfile, logout } = useAuth();
   const navigate = useNavigate();
   const adminName = user?.displayName || userProfile?.name || 'Administrator';
+
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const trigger = openSidebarButtonRef.current;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', closeOnEscape);
+    const frame = requestAnimationFrame(() => closeSidebarButtonRef.current?.focus());
+
+    return () => {
+      cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+      trigger?.focus();
+    };
+  }, [sidebarOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -37,7 +57,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+    <div className="flex min-h-[100dvh] w-full items-stretch bg-[var(--background)] text-[var(--text-primary)]">
       {sidebarOpen && (
         <button
           type="button"
@@ -48,8 +68,10 @@ export default function AdminLayout() {
       )}
 
       <aside
+        aria-label="Administrator sidebar"
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] transition-transform duration-[var(--duration-normal)] lg:sticky lg:top-0 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] transition-transform duration-[var(--duration-normal)]',
+          'lg:sticky lg:top-0 lg:h-screen lg:max-h-screen lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -62,7 +84,7 @@ export default function AdminLayout() {
             <RideMintLogo variant="compact" />
             <span className="font-heading text-sm font-semibold">Admin</span>
           </Link>
-          <IconButton label="Close admin navigation" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+          <IconButton ref={closeSidebarButtonRef} label="Close admin navigation" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
             <HiXMark className="h-5 w-5" aria-hidden="true" />
           </IconButton>
         </div>
@@ -109,10 +131,14 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className="flex min-h-[100dvh] min-w-0 flex-1 flex-col"
+        inert={sidebarOpen ? true : undefined}
+        aria-hidden={sidebarOpen || undefined}
+      >
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4 lg:px-6">
           <div className="flex items-center gap-1 lg:hidden">
-            <IconButton label="Open admin navigation" onClick={() => setSidebarOpen(true)}>
+            <IconButton ref={openSidebarButtonRef} label="Open admin navigation" onClick={() => setSidebarOpen(true)}>
               <HiBars3 className="h-5 w-5" aria-hidden="true" />
             </IconButton>
             <Link
@@ -141,7 +167,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 flex-1 px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-10 sm:pt-6 lg:p-8">
           <div className="mx-auto w-full max-w-[var(--content-admin)]">
             <Outlet />
           </div>
