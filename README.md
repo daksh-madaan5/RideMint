@@ -35,9 +35,9 @@ The basic listing vertical slice is implemented:
 - `vehicleListings` Firestore service, approval policy, rules, and index file
 - approved public listing integration with the legacy demo fallback
 
-The repository now contains a local-only Firebase Emulator configuration and a
-focused Firestore Security Rules suite. Java 21 is required to run the
-Firestore emulator; rules and indexes remain undeployed until that suite passes.
+The repository contains a local-only Firebase Emulator configuration and an
+emulator-certified Firestore Security Rules suite. The complete listing,
+booking-domain, callable, concurrency, and Rules suite passes locally.
 
 The secure `rentalBookings` callable backend and deterministic date-lock
 transactions are local-emulator-only. The Spark-plan public build defaults to
@@ -83,3 +83,27 @@ resources, collections, fields, or environment keys.
 
 Never commit a populated `.env`, `.env.local`, service-account file, private
 key, or deployment token.
+
+## Spark production-demo preparation
+
+Build the public site with booking forced to preview mode:
+
+```powershell
+$env:VITE_BOOKING_MODE="preview"
+$env:VITE_USE_FIREBASE_EMULATORS="false"
+npm run build
+```
+
+After manually verifying the real Firebase project ID, deploy only traditional
+Hosting, Firestore Rules, and indexes:
+
+```powershell
+npx firebase login
+npx firebase projects:list
+npx firebase deploy --only "hosting,firestore:rules,firestore:indexes" --project YOUR_VERIFIED_REAL_PROJECT_ID
+```
+
+Never use `demo-ridemint`, unrestricted `firebase deploy`, or a deployment
+target containing `functions`. Firebase Authentication has no separate CLI
+deployment step, but the deployed domain may need to be added to Authentication
+authorized domains.

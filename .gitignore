@@ -15,6 +15,13 @@ dist-ssr
 .env.*
 !.env.example
 
+# Firebase server credentials must never enter the browser repository.
+*service-account*.json
+*serviceAccount*.json
+firebase-adminsdk-*.json
+*.pem
+*.key
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
