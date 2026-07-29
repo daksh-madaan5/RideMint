@@ -8,9 +8,12 @@
     "build": "vite build",
     "lint": "oxlint",
     "test:listings": "node --test tests/listing-policy.test.js",
-    "firebase:emulators": "firebase emulators:start --only auth,firestore --project demo-ridemint",
+    "test:booking-domain": "npm --prefix functions test",
+    "firebase:emulators": "firebase emulators:start --only auth,firestore,functions --project demo-ridemint",
     "test:rules": "firebase emulators:exec --only firestore --project demo-ridemint \"node --test tests/firestore.rules.test.js\"",
-    "test:firebase": "npm run test:listings && npm run test:rules",
+    "test:booking-backend": "firebase emulators:exec --only auth,firestore,functions --project demo-ridemint \"node --test tests/booking-functions.emulator.test.js\"",
+    "test:emulators": "firebase emulators:exec --only auth,firestore,functions --project demo-ridemint \"node --test tests/firestore.rules.test.js tests/booking-functions.emulator.test.js\"",
+    "test:firebase": "npm run test:listings && npm run test:booking-domain && npm run test:emulators",
     "preview": "vite preview"
   },
   "dependencies": {

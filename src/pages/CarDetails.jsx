@@ -164,7 +164,7 @@ export default function CarDetails() {
             </Button>
             <p className="mt-3 text-center text-sm text-[var(--text-secondary)]">
               {hostedListing
-                ? 'Car requests are not available in this MVP phase.'
+                ? 'Online booking is not enabled in this portfolio demo.'
                 : vehicle.available
                 ? 'You can browse without an account. Sign-in is required only to continue to booking.'
                 : 'This demo vehicle cannot enter the booking flow while marked unavailable.'}

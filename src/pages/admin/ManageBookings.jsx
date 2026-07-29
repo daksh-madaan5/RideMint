@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
-import { getAllBookings, updateBookingStatus } from '@/firebase/bookings';
+import { useQuery } from '@tanstack/react-query';
+import { getAllBookings } from '@/firebase/bookings';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
 import Pagination from '@/components/ui/Pagination';
 import { formatPrice, formatDate } from '@/utils/helpers';
 import useDebounce from '@/hooks/useDebounce';
@@ -15,7 +13,6 @@ import useDebounce from '@/hooks/useDebounce';
 const STATUS_TABS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'];
 
 export default function ManageBookings() {
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [activeTab, setActiveTab] = useState('All');
@@ -28,17 +25,6 @@ export default function ManageBookings() {
     queryFn: getAllBookings,
   });
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }) => updateBookingStatus(id, status),
-    onSuccess: () => {
-      toast.success('Booking status updated');
-      queryClient.invalidateQueries(['admin-bookings']);
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update status');
-    }
-  });
-
   const filteredBookings = bookings.filter(booking => {
     const searchStr = `${booking.customerName || ''} ${booking.carSnapshot?.brand || ''} ${booking.carSnapshot?.model || ''}`.toLowerCase();
     const matchesSearch = searchStr.includes(debouncedSearch.toLowerCase());
@@ -48,10 +34,6 @@ export default function ManageBookings() {
 
   const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
   const paginatedBookings = filteredBookings.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-
-  const handleStatusChange = (bookingId, newStatus) => {
-    statusMutation.mutate({ id: bookingId, status: newStatus });
-  };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -67,7 +49,9 @@ export default function ManageBookings() {
     <div className="p-6 md:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Manage Bookings</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage all customer reservations.</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">
+          Legacy booking records are read-only in the portfolio demo.
+        </p>
       </div>
 
       <Card className="p-6">
@@ -122,7 +106,7 @@ export default function ManageBookings() {
                   <th className="px-6 py-4 font-medium">Dates</th>
                   <th className="px-6 py-4 font-medium">Total</th>
                   <th className="px-6 py-4 font-medium">Status</th>
-                  <th className="px-6 py-4 font-medium">Action</th>
+                  <th className="px-6 py-4 font-medium">Access</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -154,17 +138,9 @@ export default function ManageBookings() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
-                      <Select 
-                        value={booking.status}
-                        onChange={(e) => handleStatusChange(booking.id, e.target.value)}
-                        disabled={statusMutation.isPending}
-                        className="min-w-[120px] text-sm py-1.5"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </Select>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Read-only legacy record
+                      </span>
                     </td>
                   </motion.tr>
                 ))}

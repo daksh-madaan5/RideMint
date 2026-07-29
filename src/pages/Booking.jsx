@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useParams } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { toast } from 'react-toastify';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 
 import { getCarById } from '@/firebase/cars';
-import { createBooking } from '@/firebase/bookings';
-import { useAuth } from '@/hooks/useAuth';
+import { BOOKING_PREVIEW_MESSAGE } from '@/features/bookings/bookingMode';
 
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -16,13 +15,10 @@ import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import DateRangePicker from '@/components/ui/DateRangePicker';
 import StarRating from '@/components/ui/StarRating';
 
-import { formatPrice, calculateRentalDays, calculateTotalPrice } from '@/utils/helpers';
+import { formatPrice, calculateRentalDays } from '@/utils/helpers';
 
 export default function Booking() {
   const { carId } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  
   const [dateRange, setDateRange] = useState({
     from: new Date(),
     to: addDays(new Date(), 1),
@@ -31,17 +27,6 @@ export default function Booking() {
   const { data: car, isLoading, error } = useQuery({
     queryKey: ['car', carId],
     queryFn: () => getCarById(carId),
-  });
-
-  const bookingMutation = useMutation({
-    mutationFn: (bookingData) => createBooking(bookingData),
-    onSuccess: () => {
-      toast.success('Booking confirmed successfully!');
-      navigate('/my-bookings');
-    },
-    onError: (err) => {
-      toast.error('Failed to confirm booking: ' + err.message);
-    },
   });
 
   if (isLoading) {
@@ -66,14 +51,8 @@ export default function Booking() {
 
   const rentalDays = calculateRentalDays(dateRange.from, dateRange.to);
   const basePrice = rentalDays > 0 ? car.pricePerDay * rentalDays : 0;
-  const serviceFee = basePrice * 0.1; // 10%
-  const total = basePrice + serviceFee;
 
   const handleConfirmBooking = () => {
-    if (!user) {
-      toast.error('Please log in to book a car.');
-      return;
-    }
     if (!dateRange.from || !dateRange.to) {
       toast.error('Please select valid pickup and return dates.');
       return;
@@ -83,24 +62,7 @@ export default function Booking() {
       return;
     }
 
-    const bookingData = {
-      userId: user.uid,
-      carId: car.id,
-      carSnapshot: {
-        brand: car.brand,
-        model: car.model,
-        image: car.images?.[0] || '',
-      },
-      pickupDate: dateRange.from.toISOString(),
-      returnDate: dateRange.to.toISOString(),
-      basePrice,
-      serviceFee,
-      totalPrice: total,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    bookingMutation.mutate(bookingData);
+    toast.info(BOOKING_PREVIEW_MESSAGE);
   };
 
   const breadcrumbItems = [
@@ -119,7 +81,10 @@ export default function Booking() {
     >
       <Breadcrumbs items={breadcrumbItems} className="mb-6" />
       
-      <h1 className="text-3xl font-bold mb-8">Confirm Your Booking</h1>
+      <h1 className="text-3xl font-bold mb-2">Booking estimate</h1>
+      <p className="mb-8 text-sm text-gray-600 dark:text-gray-400">
+        Select dates to preview an estimated rental amount. No booking or availability hold will be created.
+      </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Summary & Dates */}
@@ -170,34 +135,32 @@ export default function Booking() {
         {/* Right Column: Price Breakdown */}
         <div>
           <Card className="p-6 sticky top-24">
-            <h3 className="text-xl font-semibold mb-6">Price Breakdown</h3>
+            <h3 className="text-xl font-semibold mb-6">Estimated price</h3>
             
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-gray-600 dark:text-gray-300">
                 <span>{formatPrice(car.pricePerDay)} × {rentalDays} {rentalDays === 1 ? 'day' : 'days'}</span>
                 <span>{formatPrice(basePrice)}</span>
               </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-300">
-                <span>Service Fee (10%)</span>
-                <span>{formatPrice(serviceFee)}</span>
-              </div>
             </div>
 
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-8">
               <div className="flex justify-between items-center text-xl font-bold">
-                <span>Total</span>
-                <span className="text-primary-600 dark:text-primary-400">{formatPrice(total)}</span>
+                <span>Estimated total</span>
+                <span className="text-primary-600 dark:text-primary-400">{formatPrice(basePrice)}</span>
               </div>
             </div>
 
             <Button 
               className="w-full py-4 text-lg"
               onClick={handleConfirmBooking}
-              disabled={bookingMutation.isPending || rentalDays < 1}
-              isLoading={bookingMutation.isPending}
+              disabled={rentalDays < 1}
             >
-              {bookingMutation.isPending ? 'Processing...' : 'Confirm Booking'}
+              Booking preview only
             </Button>
+            <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
+              {BOOKING_PREVIEW_MESSAGE}
+            </p>
           </Card>
         </div>
       </div>

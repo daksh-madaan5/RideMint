@@ -39,6 +39,10 @@ The repository now contains a local-only Firebase Emulator configuration and a
 focused Firestore Security Rules suite. Java 21 is required to run the
 Firestore emulator; rules and indexes remain undeployed until that suite passes.
 
+The secure `rentalBookings` callable backend and deterministic date-lock
+transactions are local-emulator-only. The Spark-plan public build defaults to
+an honest booking preview and never deploys Functions.
+
 The latest polish phase adds inactive-listing reactivation, clearer status-based
 owner listing groups, supplied PNG branding, and a light Graphite Mint migration
 for the admin shell and listing moderation.
@@ -53,6 +57,7 @@ See:
 - [Listing MVP and emulator setup](docs/listing-mvp.md)
 - [Firebase setup](docs/firebase-setup.md)
 - [Firestore security decisions](docs/firestore-security.md)
+- [Secure booking backend](docs/booking-backend.md)
 - [Data model](docs/data-model.md)
 - [Progress](docs/progress.md)
 - [Engineering guide](AGENTS.md)

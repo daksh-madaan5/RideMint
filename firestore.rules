@@ -222,6 +222,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    function participatesInRentalBooking() {
+      return isOwner(resource.data.customerId)
+        || isOwner(resource.data.ownerId);
+    }
+
+    match /rentalBookings/{bookingId} {
+      allow read: if participatesInRentalBooking() || isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /bookingLocks/{lockId} {
+      allow read, write: if false;
+    }
+
     function validReviewSnapshot(snapshot) {
       return snapshot is map
         && snapshot.keys().hasOnly(['name', 'avatar'])

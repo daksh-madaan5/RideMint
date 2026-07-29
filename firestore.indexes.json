@@ -7,6 +7,22 @@
         { "fieldPath": "listingStatus", "order": "ASCENDING" },
         { "fieldPath": "availabilityStatus", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "rentalBookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "rentalBookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

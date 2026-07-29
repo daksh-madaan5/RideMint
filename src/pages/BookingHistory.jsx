@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'react-toastify';
 import { Link } from 'react-router';
 import { clsx } from 'clsx';
-import { HiOutlineCalendar, HiOutlineCreditCard } from 'react-icons/hi2';
+import { HiOutlineCalendar } from 'react-icons/hi2';
 
-import { getUserBookings, updateBookingStatus } from '@/firebase/bookings';
+import { getUserBookings } from '@/firebase/bookings';
 import { useAuth } from '@/hooks/useAuth';
 
 import Card from '@/components/ui/Card';
@@ -14,59 +13,18 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Skeleton from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 import { formatPrice, formatDate } from '@/utils/helpers';
 
 export default function BookingHistory() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('all');
-  const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [bookingToCancel, setBookingToCancel] = useState(null);
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['bookings', user?.uid],
     queryFn: () => getUserBookings(user?.uid),
     enabled: !!user?.uid,
   });
-
-  const cancelMutation = useMutation({
-    mutationFn: (bookingId) => updateBookingStatus(bookingId, 'cancelled'),
-    onMutate: async (bookingId) => {
-      await queryClient.cancelQueries({ queryKey: ['bookings', user?.uid] });
-      const previousBookings = queryClient.getQueryData(['bookings', user?.uid]);
-      queryClient.setQueryData(['bookings', user?.uid], (old) => 
-        old?.map(booking => 
-          booking.id === bookingId ? { ...booking, status: 'cancelled' } : booking
-        )
-      );
-      return { previousBookings };
-    },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(['bookings', user?.uid], context.previousBookings);
-      toast.error('Failed to cancel booking.');
-    },
-    onSuccess: () => {
-      toast.success('Booking cancelled successfully.');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings', user?.uid] });
-    },
-  });
-
-  const handleCancelClick = (booking) => {
-    setBookingToCancel(booking);
-    setCancelModalOpen(true);
-  };
-
-  const confirmCancel = () => {
-    if (bookingToCancel) {
-      cancelMutation.mutate(bookingToCancel.id);
-      setCancelModalOpen(false);
-      setBookingToCancel(null);
-    }
-  };
 
   const tabs = [
     { id: 'all', label: 'All Bookings' },
@@ -112,6 +70,9 @@ export default function BookingHistory() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">My Bookings</h1>
+      <p className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+        This page shows legacy booking history only. Online booking management is not enabled in this portfolio demo.
+      </p>
 
       <div className="flex overflow-x-auto pb-2 mb-6 gap-2 hide-scrollbar">
         {tabs.map((tab) => (
@@ -201,15 +162,6 @@ export default function BookingHistory() {
                         <Link to={`/cars/${booking.carId}`}>
                           <Button variant="outline" size="sm">View Car</Button>
                         </Link>
-                        {['pending', 'confirmed'].includes(booking.status) && (
-                          <Button 
-                            variant="danger" 
-                            size="sm"
-                            onClick={() => handleCancelClick(booking)}
-                          >
-                            Cancel
-                          </Button>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -219,16 +171,6 @@ export default function BookingHistory() {
           </AnimatePresence>
         </div>
       )}
-
-      <ConfirmDialog
-        isOpen={cancelModalOpen}
-        onClose={() => setCancelModalOpen(false)}
-        onConfirm={confirmCancel}
-        title="Cancel Booking"
-        message={`Are you sure you want to cancel your booking for the ${bookingToCancel?.carSnapshot?.brand} ${bookingToCancel?.carSnapshot?.model}? This action cannot be undone.`}
-        confirmText="Yes, Cancel Booking"
-        confirmVariant="danger"
-      />
     </div>
   );
 }

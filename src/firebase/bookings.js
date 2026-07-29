@@ -4,40 +4,12 @@ import {
   doc,
   getDoc,
   getDocs,
-  addDoc,
-  updateDoc,
   query,
   where,
-  orderBy,
-  serverTimestamp
+  orderBy
 } from 'firebase/firestore';
 
 const bookingsCollection = collection(db, 'bookings');
-
-/**
- * Create a new booking
- * @param {Object} data
- * @returns {Promise<string>}
- */
-export async function createBooking({ userId, carId, pickupDate, returnDate, totalPrice, carSnapshot }) {
-  try {
-    const bookingData = {
-      userId,
-      carId,
-      pickupDate,
-      returnDate,
-      totalPrice,
-      carSnapshot,
-      status: 'pending',
-      createdAt: serverTimestamp()
-    };
-    const docRef = await addDoc(bookingsCollection, bookingData);
-    return docRef.id;
-  } catch (error) {
-    console.error('Error creating booking:', error);
-    throw error;
-  }
-}
 
 /**
  * Get all bookings for a user
@@ -89,37 +61,6 @@ export async function getBookingById(id) {
     return null;
   } catch (error) {
     console.error('Error fetching booking:', error);
-    throw error;
-  }
-}
-
-/**
- * Update the status of a booking
- * @param {string} id
- * @param {string} status
- * @returns {Promise<void>}
- */
-export async function updateBookingStatus(id, status) {
-  try {
-    const docRef = doc(db, 'bookings', id);
-    await updateDoc(docRef, { status });
-  } catch (error) {
-    console.error('Error updating booking status:', error);
-    throw error;
-  }
-}
-
-/**
- * Cancel a booking
- * @param {string} id
- * @returns {Promise<void>}
- */
-export async function cancelBooking(id) {
-  try {
-    const docRef = doc(db, 'bookings', id);
-    await updateDoc(docRef, { status: 'cancelled' });
-  } catch (error) {
-    console.error('Error cancelling booking:', error);
     throw error;
   }
 }

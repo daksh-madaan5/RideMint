@@ -384,3 +384,76 @@ test('26. normal user cannot perform an administrator-only legacy operation', as
     })
   );
 });
+
+function rentalBookingData(overrides = {}) {
+  return {
+    customerId: 'customer-a',
+    ownerId: 'owner-a',
+    listingId: 'listing-a',
+    pickupDate: '2026-08-10',
+    returnDate: '2026-08-13',
+    status: 'pending',
+    createdAt: FIXTURE_TIME,
+    updatedAt: FIXTURE_TIME,
+    ...overrides,
+  };
+}
+
+test('28. customer reads their own rental booking', async () => {
+  await seedDocument('rentalBookings/rental-28', rentalBookingData());
+  await assertSucceeds(
+    getDoc(doc(authenticatedDb('customer-a'), 'rentalBookings/rental-28'))
+  );
+});
+
+test('29. host reads a request for their listing', async () => {
+  await seedDocument('rentalBookings/rental-29', rentalBookingData());
+  await assertSucceeds(
+    getDoc(doc(authenticatedDb('owner-a'), 'rentalBookings/rental-29'))
+  );
+});
+
+test('30. unrelated user cannot read a rental booking', async () => {
+  await seedDocument('rentalBookings/rental-30', rentalBookingData());
+  await assertFails(
+    getDoc(doc(authenticatedDb('unrelated-user'), 'rentalBookings/rental-30'))
+  );
+});
+
+test('31. browser cannot create a rental booking directly', async () => {
+  await assertFails(
+    setDoc(
+      doc(authenticatedDb('customer-a'), 'rentalBookings/rental-31'),
+      rentalBookingData()
+    )
+  );
+});
+
+test('32. browser cannot update rental booking status directly', async () => {
+  await seedDocument('rentalBookings/rental-32', rentalBookingData());
+  await assertFails(
+    updateDoc(doc(authenticatedDb('customer-a'), 'rentalBookings/rental-32'), {
+      status: 'confirmed',
+    })
+  );
+});
+
+test('33. browser cannot read or write booking locks', async () => {
+  await seedDocument('bookingLocks/listing-a_2026-08-10', {
+    listingId: 'listing-a',
+    bookingId: 'rental-33',
+    rentalDate: '2026-08-10',
+    createdAt: FIXTURE_TIME,
+  });
+  const lockRef = doc(authenticatedDb('owner-a'), 'bookingLocks/listing-a_2026-08-10');
+
+  await assertFails(getDoc(lockRef));
+  await assertFails(
+    setDoc(doc(authenticatedDb('owner-a'), 'bookingLocks/listing-a_2026-08-11'), {
+      listingId: 'listing-a',
+      bookingId: 'rental-33',
+      rentalDate: '2026-08-11',
+      createdAt: FIXTURE_TIME,
+    })
+  );
+});
