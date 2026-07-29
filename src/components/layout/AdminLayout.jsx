@@ -54,7 +54,11 @@ export default function AdminLayout() {
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-4">
-          <Link to="/admin" className="focus-ring inline-flex items-center gap-3 rounded-[var(--radius-control)]">
+          <Link
+            to="/"
+            aria-label="Return to the RideMint customer site"
+            className="focus-ring inline-flex items-center gap-3 rounded-[var(--radius-control)]"
+          >
             <RideMintLogo variant="compact" />
             <span className="font-heading text-sm font-semibold">Admin</span>
           </Link>
@@ -88,10 +92,11 @@ export default function AdminLayout() {
         <div className="space-y-1 border-t border-[var(--border)] p-3">
           <Link
             to="/"
+            onClick={() => setSidebarOpen(false)}
             className="focus-ring flex h-10 items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]"
           >
             <HiHome className="h-5 w-5" aria-hidden="true" />
-            Back to site
+            Back to RideMint
           </Link>
           <button
             type="button"
@@ -106,9 +111,19 @@ export default function AdminLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-4 lg:px-6">
-          <IconButton label="Open admin navigation" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-            <HiBars3 className="h-5 w-5" aria-hidden="true" />
-          </IconButton>
+          <div className="flex items-center gap-1 lg:hidden">
+            <IconButton label="Open admin navigation" onClick={() => setSidebarOpen(true)}>
+              <HiBars3 className="h-5 w-5" aria-hidden="true" />
+            </IconButton>
+            <Link
+              to="/"
+              aria-label="Back to RideMint"
+              className="focus-ring inline-flex h-10 items-center gap-2 rounded-[var(--radius-control)] px-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]"
+            >
+              <HiHome className="h-5 w-5" aria-hidden="true" />
+              <span className="hidden sm:inline">RideMint</span>
+            </Link>
+          </div>
           <div className="hidden lg:block">
             <p className="text-sm font-medium">RideMint administration</p>
           </div>

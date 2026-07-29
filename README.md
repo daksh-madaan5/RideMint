@@ -35,8 +35,9 @@ The basic listing vertical slice is implemented:
 - `vehicleListings` Firestore service, approval policy, rules, and index file
 - approved public listing integration with the legacy demo fallback
 
-The repository does not yet contain an Emulator Suite setup, so the new rules
-have not been emulator-certified or deployed.
+The repository now contains a local-only Firebase Emulator configuration and a
+focused Firestore Security Rules suite. Java 21 is required to run the
+Firestore emulator; rules and indexes remain undeployed until that suite passes.
 
 The latest polish phase adds inactive-listing reactivation, clearer status-based
 owner listing groups, supplied PNG branding, and a light Graphite Mint migration
@@ -51,6 +52,7 @@ See:
 - [Image credits and strategy](docs/image-credits.md)
 - [Listing MVP and emulator setup](docs/listing-mvp.md)
 - [Firebase setup](docs/firebase-setup.md)
+- [Firestore security decisions](docs/firestore-security.md)
 - [Data model](docs/data-model.md)
 - [Progress](docs/progress.md)
 - [Engineering guide](AGENTS.md)

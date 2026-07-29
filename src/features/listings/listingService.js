@@ -13,7 +13,6 @@ import { db } from '@/firebase/config';
 import {
   getListingStatusAfterOwnerEdit,
   getReactivatedListingState,
-  hasMaterialListingChanges,
   MATERIAL_LISTING_FIELDS,
 } from './listingPolicy';
 
@@ -76,12 +75,10 @@ export async function updateOwnListing({ listingId, ownerId, current, values, im
 
   const next = { ...pickEditableFields(values), images };
   const listingStatus = getListingStatusAfterOwnerEdit(current, next);
-  const materialChange = hasMaterialListingChanges(current, next);
 
   await updateDoc(doc(db, 'vehicleListings', listingId), {
     ...next,
     listingStatus,
-    rejectionReason: materialChange ? null : current.rejectionReason || null,
     updatedAt: serverTimestamp(),
   });
 }

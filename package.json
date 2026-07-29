@@ -8,6 +8,9 @@
     "build": "vite build",
     "lint": "oxlint",
     "test:listings": "node --test tests/listing-policy.test.js",
+    "firebase:emulators": "firebase emulators:start --only auth,firestore --project demo-ridemint",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-ridemint \"node --test tests/firestore.rules.test.js\"",
+    "test:firebase": "npm run test:listings && npm run test:rules",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -28,10 +31,12 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "firebase-tools": "^15.24.0",
     "oxlint": "^1.71.0",
     "puppeteer": "^25.4.0",
     "tailwindcss": "^4.3.3",
