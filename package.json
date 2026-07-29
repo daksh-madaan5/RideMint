@@ -1,11 +1,13 @@
 {
-  "name": "project-01",
+  "name": "ridemint",
   "private": true,
   "version": "0.0.0",
+  "description": "Peer-to-peer car-listing marketplace",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:preview": "vite build --mode production",
     "lint": "oxlint",
     "test:listings": "node --test tests/listing-policy.test.js",
     "test:booking-domain": "npm --prefix functions test",
@@ -42,7 +44,6 @@
     "@vitejs/plugin-react": "^6.0.3",
     "firebase-tools": "^15.24.0",
     "oxlint": "^1.71.0",
-    "puppeteer": "^25.4.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.1.1"
   }

@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import { HiArrowRight, HiMapPin } from 'react-icons/hi2';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -6,10 +6,35 @@ import { formatPrice } from '@/utils/helpers';
 import VehicleImage from './VehicleImage';
 
 export default function CarCard({ car }) {
+  const navigate = useNavigate();
   const vehicleName = `${car.brand} ${car.model}`;
+  const detailsPath = `/cars/${car.id}`;
+
+  const openDetails = () => navigate(detailsPath);
+
+  const handleCardClick = (event) => {
+    const interactiveTarget = event.target.closest(
+      'a, button, input, select, textarea, [role="button"], [role="link"]'
+    );
+    if (interactiveTarget && interactiveTarget !== event.currentTarget) return;
+    openDetails();
+  };
+
+  const handleCardKeyDown = (event) => {
+    if (event.target !== event.currentTarget || !['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    openDetails();
+  };
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-subtle)] transition-[transform,border-color,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)] hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]">
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`View details for ${vehicleName}`}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      className="focus-ring group flex h-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-subtle)] transition-[transform,border-color,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)] hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]"
+    >
       <VehicleImage
         src={car.image || car.images?.[0]}
         alt={`${vehicleName} rental vehicle`}
@@ -55,7 +80,7 @@ export default function CarCard({ car }) {
               <span className="ml-1 text-sm font-normal text-[var(--text-secondary)]">/day</span>
             </p>
           </div>
-          <Button as={Link} to={`/cars/${car.id}`} variant="outline" size="sm" iconRight={HiArrowRight}>
+          <Button onClick={openDetails} variant="outline" size="sm" iconRight={HiArrowRight}>
             View details
           </Button>
         </div>
@@ -63,4 +88,3 @@ export default function CarCard({ car }) {
     </article>
   );
 }
-

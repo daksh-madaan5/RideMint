@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Routes, Route } from 'react-router';
 import RootLayout from '@/components/layout/RootLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
+import ScrollToTop from '@/components/layout/ScrollToTop';
 import ProtectedRoute from './ProtectedRoute';
 import AdminRoute from './AdminRoute';
 
@@ -55,6 +56,7 @@ function PageLoader() {
 export default function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
+      <ScrollToTop />
       <Routes>
         <Route path="/design-system" element={<DesignSystem />} />
 

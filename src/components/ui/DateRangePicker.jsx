@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { addDays, format, startOfDay } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,7 +15,11 @@ export default function DateRangePicker({
   disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeField, setActiveField] = useState('pickup');
   const containerRef = useRef(null);
+  const pickupButtonRef = useRef(null);
+  const returnButtonRef = useRef(null);
+  const calendarId = useId();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -23,31 +27,44 @@ export default function DateRangePicker({
         setIsOpen(false);
       }
     };
+    const handleEscape = (e) => {
+      if (e.key !== 'Escape') return;
+      setIsOpen(false);
+      const activeButton = activeField === 'pickup' ? pickupButtonRef : returnButtonRef;
+      activeButton.current?.focus();
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [activeField]);
 
   const today = startOfDay(new Date());
   const latestReturnDate = addDays(pickupDate || today, maxRentalDays);
 
-  const handleSelect = (range) => {
+  const openCalendar = (field) => {
+    setActiveField(field);
+    setIsOpen(true);
+  };
+
+  const handleSelect = (_range, selectedDate) => {
     if (disabled) return;
-    if (!range) {
-      onPickupChange(undefined);
-      onReturnChange(undefined);
+
+    if (activeField === 'pickup') {
+      onPickupChange(selectedDate);
+      const returnRemainsValid = returnDate
+        && returnDate > selectedDate
+        && returnDate <= addDays(selectedDate, maxRentalDays);
+      if (!returnRemainsValid) onReturnChange(undefined);
+      setActiveField('return');
       return;
     }
-    
-    if (range.from) {
-      onPickupChange(range.from);
-    }
-    
-    if (range.to) {
-      onReturnChange(range.to);
-      setIsOpen(false);
-    } else {
-      onReturnChange(undefined);
-    }
+
+    onReturnChange(selectedDate);
+    setIsOpen(false);
+    returnButtonRef.current?.focus();
   };
 
   const displayFormat = 'MMM dd, yyyy';
@@ -56,40 +73,62 @@ export default function DateRangePicker({
 
   return (
     <div ref={containerRef} className="relative w-full max-w-lg">
-      <button
-        type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        disabled={disabled}
-        aria-expanded={isOpen}
-        aria-haspopup="dialog"
-        aria-label={`Choose rental dates. Pickup ${pickupText}. Return ${returnText}.`}
+      <div
         className={clsx(
-          'focus-ring flex w-full overflow-hidden rounded-[var(--radius-control)] border text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-          isOpen 
+          'flex w-full overflow-hidden rounded-[var(--radius-control)] border bg-[var(--surface)] transition-colors',
+          disabled && 'opacity-60',
+          isOpen
             ? 'border-[var(--primary)] bg-[var(--surface)]'
             : 'border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-strong)]'
         )}
       >
-        <div className="flex flex-1 flex-col justify-center px-4 py-3 sm:px-6">
+        <button
+          ref={pickupButtonRef}
+          type="button"
+          onClick={() => openCalendar('pickup')}
+          disabled={disabled}
+          aria-expanded={isOpen && activeField === 'pickup'}
+          aria-haspopup="dialog"
+          aria-controls={calendarId}
+          aria-label={`Choose pickup date. Current pickup ${pickupText}.`}
+          className={clsx(
+            'focus-ring flex flex-1 flex-col justify-center px-4 py-3 text-left transition-colors disabled:cursor-not-allowed sm:px-6',
+            isOpen && activeField === 'pickup' && 'bg-[var(--primary-subtle)]'
+          )}
+        >
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">Pickup</span>
           <div className="mt-1 flex items-center text-sm font-medium text-[var(--text-primary)]">
             <HiCalendarDays className="mr-2 h-5 w-5 text-[var(--primary)]" aria-hidden="true" />
             {pickupText}
           </div>
-        </div>
+        </button>
         <div className="w-px bg-[var(--border)]" />
-        <div className="flex flex-1 flex-col justify-center px-4 py-3 sm:px-6">
+        <button
+          ref={returnButtonRef}
+          type="button"
+          onClick={() => openCalendar('return')}
+          disabled={disabled}
+          aria-expanded={isOpen && activeField === 'return'}
+          aria-haspopup="dialog"
+          aria-controls={calendarId}
+          aria-label={`Choose return date. Current return ${returnText}.`}
+          className={clsx(
+            'focus-ring flex flex-1 flex-col justify-center px-4 py-3 text-left transition-colors disabled:cursor-not-allowed sm:px-6',
+            isOpen && activeField === 'return' && 'bg-[var(--primary-subtle)]'
+          )}
+        >
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">Return</span>
           <div className="mt-1 flex items-center text-sm font-medium text-[var(--text-primary)]">
             <HiCalendarDays className="mr-2 h-5 w-5 text-[var(--primary)]" aria-hidden="true" />
             {returnText}
           </div>
-        </div>
-      </button>
+        </button>
+      </div>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id={calendarId}
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -108,13 +147,16 @@ export default function DateRangePicker({
               }
             `}</style>
             <DayPicker
+              key={activeField}
               mode="range"
               selected={{ from: pickupDate, to: returnDate }}
               onSelect={handleSelect}
-              disabled={[
-                { before: today },
-                { after: latestReturnDate },
-              ]}
+              disabled={activeField === 'pickup'
+                ? [{ before: today }]
+                : [
+                    { before: addDays(pickupDate || today, 1) },
+                    { after: latestReturnDate },
+                  ]}
               modifiers={{
                 start: pickupDate,
                 end: returnDate,
