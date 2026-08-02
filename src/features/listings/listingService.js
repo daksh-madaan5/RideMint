@@ -15,6 +15,7 @@ import {
   getReactivatedListingState,
   MATERIAL_LISTING_FIELDS,
 } from './listingPolicy';
+import { dedupeListingImages, getListingImageUrls } from './listingImages';
 
 const listingsCollection = collection(db, 'vehicleListings');
 
@@ -36,7 +37,7 @@ export async function createVehicleListing({ user, userProfile, values, images }
 
   const listing = {
     ...pickEditableFields(values),
-    images,
+    images: dedupeListingImages(images),
     ownerId: user.uid,
     ownerSnapshot: {
       displayName: userProfile?.name || user.displayName || 'RideMint member',
@@ -73,7 +74,7 @@ export async function getOwnerListingById(listingId, ownerId) {
 export async function updateOwnListing({ listingId, ownerId, current, values, images }) {
   if (!current || current.ownerId !== ownerId) throw new Error('You cannot edit this listing.');
 
-  const next = { ...pickEditableFields(values), images };
+  const next = { ...pickEditableFields(values), images: dedupeListingImages(images) };
   const listingStatus = getListingStatusAfterOwnerEdit(current, next);
 
   await updateDoc(doc(db, 'vehicleListings', listingId), {
@@ -140,11 +141,14 @@ export async function moderateListing({ listingId, adminId, decision, rejectionR
 }
 
 export function listingToCatalogVehicle(listing) {
+  const images = getListingImageUrls(listing);
+
   return {
     ...listing,
     source: 'firestore-listing',
     brand: listing.make,
-    image: listing.images?.[0]?.url,
+    images,
+    image: images[0],
     available: listing.availabilityStatus === 'available',
     branch: {
       name: listing.pickupArea

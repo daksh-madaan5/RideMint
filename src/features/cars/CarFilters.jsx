@@ -7,9 +7,12 @@ import {
   SUPPORTED_LOCATIONS,
   TRANSMISSION_TYPES,
 } from '@/constants';
-import {
-  CATALOG_PRICE_RANGES,
-} from './data/catalogVehicles';
+
+const CATALOG_PRICE_RANGES = [
+  { value: '0-3000', label: 'Under ₹3,000' },
+  { value: '3000-4500', label: '₹3,000–₹4,500' },
+  { value: '4500-6000', label: '₹4,500–₹6,000' },
+];
 
 export default function CarFilters({ filters, onChange, onClear, className = '' }) {
   return (
@@ -64,7 +67,7 @@ export default function CarFilters({ filters, onChange, onClear, className = '' 
         label="Daily price"
         value={filters.priceRange}
         onChange={(event) => onChange('priceRange', event.target.value)}
-        options={CATALOG_PRICE_RANGES.slice(1)}
+        options={CATALOG_PRICE_RANGES}
         placeholder="Any price"
       />
     </form>

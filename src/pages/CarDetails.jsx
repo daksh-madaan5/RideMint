@@ -15,6 +15,7 @@ import Skeleton from '@/components/ui/Skeleton';
 import VehicleImage from '@/features/cars/VehicleImage';
 import { useCatalogVehicle } from '@/features/cars/hooks/useCatalogVehicles';
 import SecureBookingPanel from '@/features/bookings/SecureBookingPanel';
+import ListingImageGallery from '@/features/listings/ListingImageGallery';
 import { formatPrice } from '@/utils/helpers';
 
 export default function CarDetails() {
@@ -62,7 +63,11 @@ export default function CarDetails() {
 
       <div className="mt-7 grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
         <div>
-          <VehicleImage src={vehicle.image} alt={`${vehicleName} rental vehicle`} className="rounded-[var(--radius-panel)] border border-[var(--border)]" eager />
+          {vehicle.source === 'firestore-listing' ? (
+            <ListingImageGallery listing={vehicle} alt={`${vehicleName} rental vehicle`} eager />
+          ) : (
+            <VehicleImage src={vehicle.image} alt={`${vehicleName} rental vehicle`} className="rounded-[var(--radius-panel)] border border-[var(--border)]" eager />
+          )}
           <section className="mt-8" aria-labelledby="specifications-title">
             <h2 id="specifications-title" className="font-heading text-xl font-semibold">Vehicle specifications</h2>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">

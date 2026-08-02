@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { clsx } from 'clsx';
-import { VEHICLE_PLACEHOLDER_IMAGE } from './data/catalogVehicles';
+import { DEFAULT_CAR_IMAGE } from '@/utils/helpers';
 
 export default function VehicleImage({
   src,
@@ -9,10 +9,10 @@ export default function VehicleImage({
   imageClassName,
   eager = false,
 }) {
-  const [resolvedSource, setResolvedSource] = useState(src || VEHICLE_PLACEHOLDER_IMAGE);
+  const [resolvedSource, setResolvedSource] = useState(src || DEFAULT_CAR_IMAGE);
 
   useEffect(() => {
-    setResolvedSource(src || VEHICLE_PLACEHOLDER_IMAGE);
+    setResolvedSource(src || DEFAULT_CAR_IMAGE);
   }, [src]);
 
   return (
@@ -23,7 +23,7 @@ export default function VehicleImage({
         width="1600"
         height="1000"
         loading={eager ? 'eager' : 'lazy'}
-        onError={() => setResolvedSource(VEHICLE_PLACEHOLDER_IMAGE)}
+        onError={() => setResolvedSource(DEFAULT_CAR_IMAGE)}
         className={clsx('h-full w-full object-cover', imageClassName)}
       />
     </div>

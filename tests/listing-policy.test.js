@@ -5,6 +5,10 @@ import {
   getReactivatedListingState,
   hasMaterialListingChanges,
 } from '../src/features/listings/listingPolicy.js';
+import {
+  dedupeListingImages,
+  getListingImageUrls,
+} from '../src/features/listings/listingImages.js';
 
 const approvedListing = {
   listingStatus: 'approved',
@@ -53,5 +57,29 @@ test('reactivation rejects listings that are not inactive', () => {
   assert.throws(
     () => getReactivatedListingState(approvedListing),
     /Only inactive listings can be reactivated/
+  );
+});
+
+test('listing images retain distinct Cloudinary results and remove duplicate URLs', () => {
+  const first = { url: 'https://example.test/one.jpg', assetId: 'asset-1', publicId: 'cars/one' };
+  const second = { url: 'https://example.test/two.jpg', assetId: 'asset-2', publicId: 'cars/two' };
+  const duplicateUrl = { ...second, assetId: 'asset-3', publicId: 'cars/two-copy' };
+
+  assert.deepEqual(dedupeListingImages([first, second, duplicateUrl]), [first, second]);
+});
+
+test('listing image URLs support metadata objects and legacy single-image fields', () => {
+  assert.deepEqual(
+    getListingImageUrls({
+      images: [
+        { url: 'https://example.test/one.jpg' },
+        { url: 'https://example.test/two.jpg' },
+      ],
+    }),
+    ['https://example.test/one.jpg', 'https://example.test/two.jpg']
+  );
+  assert.deepEqual(
+    getListingImageUrls({ image: 'https://example.test/legacy.jpg' }),
+    ['https://example.test/legacy.jpg']
   );
 });

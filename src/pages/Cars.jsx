@@ -70,6 +70,7 @@ export default function Cars() {
   const dateContext = pickup && returnDate
     ? `${formatDate(pickup)} to ${formatDate(returnDate)}`
     : null;
+  const hasActiveFilters = FILTER_KEYS.some((key) => Boolean(filters[key]));
 
   return (
     <div className="mx-auto max-w-[var(--content-customer)] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
@@ -133,9 +134,11 @@ export default function Cars() {
             <EmptyState
               className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
               icon={HiOutlineMagnifyingGlass}
-              title="No cars match these filters"
-              description="Clear the filters and try a broader search."
-              action={{ label: 'Clear filters', onClick: clearFilters }}
+              title={hasActiveFilters ? 'No cars match these filters' : 'No cars available yet'}
+              description={hasActiveFilters
+                ? 'Clear the filters and try a broader search.'
+                : 'Approved cars from local hosts will appear here when they are available.'}
+              action={hasActiveFilters ? { label: 'Clear filters', onClick: clearFilters } : undefined}
             />
           )}
           {!isLoading && !isError && filteredVehicles.length > 0 && (

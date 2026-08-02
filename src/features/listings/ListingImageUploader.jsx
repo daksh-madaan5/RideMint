@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { HiArrowUpTray, HiPhoto, HiTrash } from 'react-icons/hi2';
 import Button from '@/components/ui/Button';
+import { dedupeListingImages } from './listingImages';
 
 const WIDGET_SCRIPT = 'https://upload-widget.cloudinary.com/global/all.js';
 let widgetScriptPromise;
@@ -88,10 +89,7 @@ export default function ListingImageUploader({ images, onChange, error }) {
               format: info.format,
             };
             onChange((current) => {
-              if (current.some((image) => image.assetId === uploaded.assetId || image.publicId === uploaded.publicId)) {
-                return current;
-              }
-              return [...current, uploaded].slice(0, 4);
+              return dedupeListingImages([...current, uploaded]).slice(0, 4);
             });
             setUploadState('success');
             setMessage('Image uploaded successfully.');

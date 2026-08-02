@@ -15,7 +15,7 @@ import Modal from '@/components/ui/Modal';
 import PageHeader from '@/components/ui/PageHeader';
 import Skeleton from '@/components/ui/Skeleton';
 import Textarea from '@/components/ui/Textarea';
-import VehicleImage from '@/features/cars/VehicleImage';
+import ListingImageGallery from '@/features/listings/ListingImageGallery';
 import { usePendingListings } from '@/features/listings/listingHooks';
 import { moderateListing } from '@/features/listings/listingService';
 import { useAuth } from '@/hooks/useAuth';
@@ -166,14 +166,10 @@ export default function ModerateListings() {
         {selected && (
           <div className="grid gap-6 md:grid-cols-[1fr_1.05fr]">
             <div>
-              <VehicleImage
-                src={selected.images?.[0]?.url}
+              <ListingImageGallery
+                listing={selected}
                 alt={`${selected.make} ${selected.model} submitted listing`}
-                className="rounded-[var(--radius-card)] border border-[var(--border)]"
               />
-              {selected.images?.length > 1 && (
-                <p className="mt-2 text-xs text-[var(--text-secondary)]">{selected.images.length} images submitted</p>
-              )}
             </div>
             <div>
               <dl className="grid grid-cols-2 gap-4 text-sm">

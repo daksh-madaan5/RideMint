@@ -15,7 +15,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ErrorState from '@/components/ui/ErrorState';
 import PageHeader from '@/components/ui/PageHeader';
 import Skeleton from '@/components/ui/Skeleton';
-import VehicleImage from '@/features/cars/VehicleImage';
+import ListingImageGallery from '@/features/listings/ListingImageGallery';
 import {
   useOwnerListings,
   useReactivateListing,
@@ -149,10 +149,10 @@ export default function MyListings() {
                       className={`overflow-hidden rounded-[var(--radius-card)] border border-l-4 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-subtle)] transition-[transform,border-color,box-shadow] duration-[var(--duration-normal)] hover:-translate-y-[3px] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-card)] ${presentation.accent}`}
                     >
                       <div className="grid h-full sm:grid-cols-[12rem_1fr]">
-                        <VehicleImage
-                          src={listing.images?.[0]?.url}
+                        <ListingImageGallery
+                          listing={listing}
                           alt={`${listing.make} ${listing.model} listing`}
-                          className="sm:h-full sm:aspect-auto"
+                          compact
                         />
                         <div className="flex min-w-0 flex-col p-5">
                           <div className="flex flex-wrap items-start justify-between gap-3">

@@ -26,6 +26,8 @@ export default function Modal({
   const descriptionId = useId();
   const dialogRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   const sizes = {
     sm: 'max-w-md',
@@ -36,8 +38,8 @@ export default function Modal({
   };
 
   const handleKeyDown = useCallback((event) => {
-    if (event.key === 'Escape' && onClose) {
-      onClose();
+    if (event.key === 'Escape' && onCloseRef.current) {
+      onCloseRef.current();
       return;
     }
 
@@ -59,7 +61,7 @@ export default function Modal({
       event.preventDefault();
       first.focus();
     }
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return undefined;
