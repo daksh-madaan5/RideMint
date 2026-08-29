@@ -7,7 +7,6 @@
     <img alt="React 19" src="https://img.shields.io/badge/React-19-20232a?style=flat-square&logo=react&logoColor=61dafb" />
     <img alt="Vite 8" src="https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white" />
     <img alt="Firebase" src="https://img.shields.io/badge/Firebase-Emulator%20certified-ffca28?style=flat-square&logo=firebase&logoColor=1f2937" />
-    <img alt="Licence not specified" src="https://img.shields.io/badge/licence-not%20specified-lightgrey?style=flat-square" />
   </p>
 </div>
 
