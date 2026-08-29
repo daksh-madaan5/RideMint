@@ -15,12 +15,11 @@
 
 ## Meet RideMint
 
-RideMint helps people discover cars listed by other members in their community. There is no separate “host” account to unlock: an authenticated member can list a car, manage it, and track its moderation status, while administrators keep the public catalogue trustworthy.
+RideMint is a peer-to-peer car rental marketplace where users can browse available cars, list their own vehicles, manage listings, and go through an admin moderation flow before a car becomes publicly visible.
 
-The project currently includes the complete browsing and listing journeys, alongside a secure booking workflow for local Firebase Emulator development. The interface follows RideMint’s **Editorial Automotive** design direction—warm, practical, and intentionally free of marketplace gimmicks.
+The project is built with React, Firebase, Firestore, and Cloudinary, with a focus on practical marketplace workflows such as multi-image vehicle listings, moderation, availability handling, and secure booking logic.
 
-> [!IMPORTANT]
-> Public Firebase Spark builds run in **preview mode**. They never call Cloud Functions or query `rentalBookings`. Secure booking is local-only until a separate production deployment is approved.
+The public deployment includes browsing, authentication, listing management, and moderation. The booking backend is implemented and tested locally with Firebase Functions and the Emulator Suite, but is not deployed publicly on the current Firebase Spark setup.
 
 ## What works today
 
@@ -34,7 +33,7 @@ The project currently includes the complete browsing and listing journeys, along
 - Prevent booking overlaps with deterministic per-day locks and trusted backend logic
 - Enforce listing, booking, user, car, and review access through Firestore Security Rules
 
-Payments, payouts, messaging, KYC, production booking Functions, and booking-management UI are deliberately outside the current scope. See [Product scope](docs/product-scope.md) for the full boundary.
+Payments, payouts, messaging, KYC, production booking Functions, and booking-management UI are deliberately outside the current scope.
 
 ## Under the bonnet
 
@@ -109,64 +108,22 @@ For safety, secure booking also checks that the app is a Vite development build 
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Starts the Vite development server |
-| `npm run lint` | Runs the Oxlint checks |
-| `npm run build:preview` | Creates the production-safe preview build |
-| `npm run preview` | Serves the built app locally |
-| `npm run test:listings` | Tests listing policy behaviour |
-| `npm run test:booking-domain` | Tests booking domain logic |
-| `npm run test:rules` | Tests Firestore allow and deny cases |
-| `npm run test:booking-backend` | Tests callable booking Functions against the emulators |
-| `npm run test:firebase` | Runs the complete certified Firebase test sequence |
+| `npm run dev` | Start the development server |
+| `npm run lint` | Run lint checks |
+| `npm run build:preview` | Create the production preview build |
+| `npm run test:firebase` | Run the Firebase test suite which covers listing policy, booking-domain logic, callable integration, concurrency, and Firestore Rules |
 
-`npm run test:firebase` covers listing policy, booking-domain logic, callable integration, concurrency, and Firestore Rules against the local `demo-ridemint` emulators. Tests do not use live production data.
 
-## Deploy a public preview
+## Deployment
 
-Deployment is intentionally manual. Before continuing, provide the production Firebase web configuration through untracked environment variables or `.env.local`, and confirm that `VITE_FIREBASE_PROJECT_ID` matches the real project you intend to use.
+RideMint is deployed using Firebase Hosting.
+
+The public build runs in preview mode, while the secure booking backend is currently tested locally with Firebase Functions and the Emulator Suite.
+
+To create a production preview build:
 
 ```powershell
-$env:VITE_BOOKING_MODE="preview"
-$env:VITE_USE_FIREBASE_EMULATORS="false"
-
 npm run build:preview
-npx firebase login
-npx firebase projects:list
-npx firebase deploy --only "hosting,firestore:rules,firestore:indexes" --project YOUR_VERIFIED_REAL_PROJECT_ID
-```
-
-> [!WARNING]
-> Never deploy from `demo-ridemint`, run an unrestricted `firebase deploy`, add `functions` to the deployment target, or use `local-secure` for a public build.
-
-Firebase Hosting serves `dist` and rewrites application routes to `/index.html`. After deployment, add the Hosting domain to Firebase Authentication’s authorised domains if required.
-
-## Project guide
-
-| Document | When to read it |
-| --- | --- |
-| [Architecture](docs/architecture.md) | Understand the application boundaries and code structure |
-| [Product scope](docs/product-scope.md) | See what belongs in RideMint—and what intentionally does not |
-| [Firebase setup](docs/firebase-setup.md) | Configure Firebase and the local Emulator Suite |
-| [Firestore security](docs/firestore-security.md) | Review access-control decisions and rule guarantees |
-| [Secure booking backend](docs/booking-backend.md) | Follow the trusted booking contract and local workflow |
-| [Listing workflow](docs/listing-mvp.md) | Understand listing creation, ownership, and moderation |
-| [Data model](docs/data-model.md) | Explore the stored document shapes and relationships |
-| [Design system](docs/design-system.md) | Work with the Graphite Mint visual language |
-| [Image credits](docs/image-credits.md) | Review attribution for bundled imagery |
-
-## A note for contributors
-
-RideMint grows in deliberately small, reviewable phases. Before adding a feature, check the current scope and preserve the security boundary: React route guards improve navigation, but Firebase Security Rules and trusted Functions provide authorisation.
-
-When making a change, please run the relevant tests as well as:
-
-```powershell
-npm run lint
-npm run build:preview
-```
-
-Keep the experience grounded in Bengaluru and Indian English, format money in INR, and favour clear, working interactions over decorative controls.
-
 ---
 
 <div align="center">
